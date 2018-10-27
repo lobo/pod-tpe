@@ -7,6 +7,18 @@
 $ mvn clean install eclipse:eclipse
 ```
 
+### Usage of files
+
+There are two files (CSV format) to use in this project. Both should be located in the following path:
+```
+client/src/main/resources/files/filename.csv
+```
+
+The files with the data are listed below (in a Google Drive public folder):
+
+1. [aeropuertos.csv](https://drive.google.com/file/d/1nEzF5higXIDDnJzWVuZP5TxVFUj4SBBh/view?usp=sharing)
+2. [movimientos.csv]()
+
 #### Run From terminal
 
 First, run *./make.sh* to generate scripts
@@ -40,3 +52,9 @@ First, run *./make.sh* to generate scripts
 * Run client
 
 **NOTE**: if after running *mvn clean install* or *./make.sh*, if want to work again from Eclipse, go to Project->Clean.
+
+## Authors
+
+* [Giuliano Scaglioni](https://github.com/giulianos)
+* [Matias Ota](https://github.com/m074)
+* [Daniel Lobo](https://github.com/lobo)
