@@ -1,5 +1,7 @@
 ./server/hazelcast.xml
 .DS_Store
+./client/src/main/resources/files/aeropuertos.csv
+./client/src/main/resources/files/movimientos.csv
 
 # Created by https://www.gitignore.io/api/vim,eclipse,intellij,maven
 
