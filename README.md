@@ -23,12 +23,12 @@ These instructions will install the development environment into your local mach
 2. Clone the repository, or download source code
 	
 	```
-	$ git clone https://github.com/juanmbellini/census
+	$ git clone https://github.com/lobo/pod-tpe
 	```
 	or
 	
 	```
-	$ wget https://github.com/juanmbellini/census/archive/master.zip
+	$ wget https://github.com/lobo/pod-tpe/archive/master.zip
 	```
 
 ## Running Instructions For Eclipse
