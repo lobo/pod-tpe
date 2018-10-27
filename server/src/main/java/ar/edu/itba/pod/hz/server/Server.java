@@ -7,6 +7,6 @@ public class Server {
     private static Logger logger = LoggerFactory.getLogger(Server.class);
 
     public static void main(String[] args) {
-        logger.info("clase09-ejer01 Server Starting ...");
+        logger.info("Server POD-ITBA-2018-2 Grupo 3 ...");
     }
 }
