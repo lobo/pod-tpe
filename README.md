@@ -1,3 +1,36 @@
+Distributed Objects Programming course Project: Grupo 3
+
+## Getting started
+These instructions will install the development environment into your local machine
+
+### Prerequisites
+
+1. Install maven
+
+	#### MacOS
+	```
+	$ brew install maven
+	```
+	
+	#### Ubuntu
+	```
+	$ sudo apt-get install maven
+	```
+	
+	#### Other OSes
+	Check [https://maven.apache.org/install.html](https://maven.apache.org/install.html.).
+
+2. Clone the repository, or download source code
+	
+	```
+	$ git clone https://github.com/juanmbellini/census
+	```
+	or
+	
+	```
+	$ wget https://github.com/juanmbellini/census/archive/master.zip
+	```
+
 ## Running Instructions For Eclipse
 
 * Clone the repo
@@ -19,11 +52,11 @@ The files with the data are listed below (in a Google Drive public folder):
 1. [aeropuertos.csv](https://drive.google.com/file/d/1nEzF5higXIDDnJzWVuZP5TxVFUj4SBBh/view?usp=sharing)
 2. [movimientos.csv]()
 
-#### Run From terminal
+### Run From terminal
 
 First, run *./make.sh* to generate scripts
 
-##### Node
+#### Node
 
 * cd to server/target/tpe-server-1.0-SNAPSHOT/
 * run *./run-node*
@@ -31,12 +64,12 @@ First, run *./make.sh* to generate scripts
 **NOTE**: make sure to activate interfaces (false->true) and specify network in hazelcast.xml to activate multiple nodes in different computers. All computers need to have same hazelcast.xml
 
 
-##### Client
+#### Client
 
 * cd to client/target/tpe-client-1.0-SNAPSHOT/
 * run *./run-client -Daddresses=xx.xx.xx.xx;yy.yy.yy.yy -Dquery=1 -DinPath=censo.csv -DoutPath=output.txt [queryParams]*
 
-#### Run From Eclipse
+### Run From Eclipse
 
 * Open Eclipse
   * Import as existing project
