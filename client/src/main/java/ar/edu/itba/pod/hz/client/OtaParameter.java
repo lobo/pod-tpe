@@ -34,8 +34,8 @@ public class OtaParameter{
             String queryNumber = System.getProperty("query");
             ret.query_number = Integer.valueOf(queryNumber);
 
-            ret.airportsInPath = System.getProperty("airportsInPath");
-            ret.movementsInPath = System.getProperty("movementsInPath");
+            ret.airportsInPath = System.getProperty("airportsInPath","aeropuertos.csv");
+            ret.movementsInPath = System.getProperty("movementsInPath","movimientos.csv");
             ret.outPath = System.getProperty("movementsInPath","");
             ret.timeOutPath = System.getProperty("movementsInPath","");
             if(ret.query_number == 1){
@@ -72,6 +72,10 @@ public class OtaParameter{
         }
         return null;
 
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getPassword() {
