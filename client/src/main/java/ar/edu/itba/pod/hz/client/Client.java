@@ -43,8 +43,14 @@ public class Client {
         this.client = HazelcastClient.newHazelcastClient(ccfg);
         this.airportsInPath = airportsInPath;
         this.movementsInPath = movementsInPath;
-        //this.outPath = new PrintWriter(outPath, "UTF-8");
-        //this.timeOutPath = new PrintWriter(timeOutPath,"UTF-8");
+        if(outPath.equals(""))
+            this.outPath = new PrintWriter(System.out);
+        else
+            this.outPath = new PrintWriter(outPath, "UTF-8");
+        if(timeOutPath.equals(""))
+            this.timeOutPath = new PrintWriter(System.err);
+        else
+            this.timeOutPath = new PrintWriter(timeOutPath,"UTF-8");
 
     }
 
@@ -75,12 +81,12 @@ public class Client {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+            logger.info("Inicio de movimientos");
             try {
                 MovementsReader.partialReadWithCsvBeanReader(movementMap, queryClient.movementsInPath);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-            logger.info("Inicio de movimientos");
             switch (p.getQuery_number()) {
                 case 1:
                     queryClient.query1(movementMap, airportsMap);
