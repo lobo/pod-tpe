@@ -3,9 +3,13 @@ package ar.edu.itba.pod.hz.client;
 import ar.edu.itba.pod.hz.client.reader.AirportsReader;
 import ar.edu.itba.pod.hz.client.reader.MovementsReader;
 import ar.edu.itba.pod.hz.model.AirportData;
+import ar.edu.itba.pod.hz.model.AirportTuple;
 import ar.edu.itba.pod.hz.model.MovementData;
 import ar.edu.itba.pod.hz.mr.query1.MovementCounterMapper;
 import ar.edu.itba.pod.hz.mr.query1.MovementCounterReducerFactory;
+import ar.edu.itba.pod.hz.mr.query2.MovementCounterDividerReducerFactory;
+import ar.edu.itba.pod.hz.mr.query2.SameKeyGrouperReducerFactory;
+import ar.edu.itba.pod.hz.mr.query2.SwapKeyValueMapper;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.client.config.ClientNetworkConfig;
@@ -21,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -86,6 +91,7 @@ public class Client {
                     queryClient.query1(movementMap, airportsMap);
                     break;
                 case 2:
+                    queryClient.query2(movementMap);
                     break;
                 case 3:
                     break;
@@ -114,10 +120,66 @@ public class Client {
 
         Map<String, Integer> result = futureResult.get();
 
+        System.out.println("OACI;Denominación;Movimientos");
         for(Map.Entry<String, Integer> airport : result.entrySet()) {
             AirportData airportData = airportsMap.get(airport.getKey());
             if(airportData != null) {
-                System.out.println(airportData.getDenomination() +  ": " + airport.getValue());
+                System.out.println(airport.getKey() + ";" + airportData.getDenomination() +  ";" + airport.getValue());
+            }
+        }
+    }
+
+    public void query2(IMap<Integer, MovementData> movementsMap)
+            throws InterruptedException, ExecutionException, FileNotFoundException, UnsupportedEncodingException {
+
+        final String INTERMEDIATE_MAP_NAME = "LEGAJOS-INTERMEDIATE";
+
+        // Find job tracker
+        JobTracker tracker = client.getJobTracker(JOB_TRACKER);
+
+        // Create source for first map-reduce job
+        KeyValueSource<Integer, MovementData> source = KeyValueSource.fromMap(movementsMap);
+
+        // Create job
+        Job<Integer, MovementData> job = tracker.newJob(source);
+
+        // Submit first map-reduce job
+        ICompletableFuture<Map<String, Integer>> intermediateFutureResult = job.mapper(new MovementCounterMapper())
+                .reducer(new MovementCounterDividerReducerFactory()).submit();
+
+        // Create local intermediate map
+        Map<String, Integer> intermediateResult = intermediateFutureResult.get();
+
+        // Create intermediate map for second map-reduce job input
+        IMap<String, Integer> intermediateMap = this.client.getMap(INTERMEDIATE_MAP_NAME);
+
+        // Clear it in case it already exists
+        intermediateMap.clear();
+
+        // Fill with entries from first map-reduce job out
+        for(Map.Entry<String, Integer> entry : intermediateResult.entrySet()) {
+            intermediateMap.set(entry.getKey(), entry.getValue());
+        }
+
+        // Create source for second map-reduce job
+        KeyValueSource<String, Integer> source2 = KeyValueSource.fromMap(intermediateMap);
+
+        // Create second job
+        Job<String, Integer> job2 = tracker.newJob(source2);
+
+        // Submit second map-reduce job
+        ICompletableFuture<Map<Integer, List<AirportTuple>>> futureResult = job2.mapper(new SwapKeyValueMapper())
+                .reducer(new SameKeyGrouperReducerFactory()).submit();
+
+        // Get map from result
+        Map<Integer, List<AirportTuple>> result = futureResult.get();
+
+        // Iterate through entries to print them
+        System.out.println("Grupo;Aeropuerto A;Aeropuerto B");
+        for(Map.Entry<Integer, List<AirportTuple>> entry : result.entrySet()) {
+            Integer millennium = entry.getKey();
+            for(AirportTuple tuple : entry.getValue()) {
+                System.out.println((millennium*1000) + ";" + tuple.getAirport1() + ";" + tuple.getAirport2());
             }
         }
     }

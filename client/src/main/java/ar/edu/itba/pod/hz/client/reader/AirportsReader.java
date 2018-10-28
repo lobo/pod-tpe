@@ -1,10 +1,8 @@
 package ar.edu.itba.pod.hz.client.reader;
 
 import ar.edu.itba.pod.hz.model.AirportData;
-import ar.edu.itba.pod.hz.model.Data;
 import com.hazelcast.core.IMap;
 import org.supercsv.cellprocessor.ConvertNullTo;
-import org.supercsv.cellprocessor.constraint.NotNull;
 import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.CsvBeanReader;
 import org.supercsv.io.ICsvBeanReader;

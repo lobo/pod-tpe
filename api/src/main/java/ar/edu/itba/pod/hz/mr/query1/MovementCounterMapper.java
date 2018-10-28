@@ -1,6 +1,5 @@
 package ar.edu.itba.pod.hz.mr.query1;
 
-import ar.edu.itba.pod.hz.model.Data;
 import ar.edu.itba.pod.hz.model.MovementData;
 import com.hazelcast.mapreduce.Context;
 import com.hazelcast.mapreduce.Mapper;
