@@ -10,16 +10,16 @@ public class AirportData implements DataSerializable {
 	
 	private String oaci;
 	private String iata;
-	private String denominacion;
-	private String provincia;
+	private String denomination;
+	private String province;
 
     // mantener el orden que se hizo en el write!
     @Override
     public void readData(final ObjectDataInput in) throws IOException {
     	oaci = in.readUTF();
     	iata = in.readUTF();
-		denominacion = in.readUTF();
-		provincia = in.readUTF();
+		denomination = in.readUTF();
+		province = in.readUTF();
     }
 
     // mantener el orden que se hizo en el read!
@@ -27,8 +27,8 @@ public class AirportData implements DataSerializable {
     public void writeData(final ObjectDataOutput out) throws IOException {
         out.writeUTF(oaci);
 		out.writeUTF(iata);
-		out.writeUTF(denominacion);
-		out.writeUTF(provincia);
+		out.writeUTF(denomination);
+		out.writeUTF(province);
     }
 
 
@@ -37,8 +37,8 @@ public class AirportData implements DataSerializable {
 		return "AirportData{" +
 				"oaci='" + oaci + '\'' +
 				", iata='" + iata + '\'' +
-				", denominacion='" + denominacion + '\'' +
-				", provincia='" + provincia + '\'' +
+				", denomination='" + denomination + '\'' +
+				", province='" + province + '\'' +
 				'}';
 	}
 
@@ -50,11 +50,27 @@ public class AirportData implements DataSerializable {
 		return iata;
 	}
 
-	public String getDenominacion() {
-		return denominacion;
+	public String getDenomination() {
+		return denomination;
 	}
 
-	public String getProvincia() {
-		return provincia;
+	public String getProvince() {
+		return province;
+	}
+
+	public void setOaci(String oaci) {
+		this.oaci = oaci;
+	}
+
+	public void setIata(String iata) {
+		this.iata = iata;
+	}
+
+	public void setDenomination(String denomination) {
+		this.denomination = denomination;
+	}
+
+	public void setProvince(String province) {
+		this.province = province;
 	}
 }

@@ -3,17 +3,14 @@ package ar.edu.itba.pod.hz.mr.query1;
 import com.hazelcast.mapreduce.Reducer;
 import com.hazelcast.mapreduce.ReducerFactory;
 
-public class AgeCategoryCounterReducerFactory implements ReducerFactory<String, Integer, Integer> {
-	private static final long serialVersionUID = 7760070699178320492L;
-
+public class MovementCounterReducerFactory implements ReducerFactory<String, Integer, Integer> {
 	@Override
 	public Reducer<Integer, Integer> newReducer(final String category) {
 		return new Reducer<Integer, Integer>() {
 			private int count;
 
 			@Override
-			public void beginReduce() // una sola vez en cada instancia
-			{
+			public void beginReduce() {
 				count = 0;
 			}
 
@@ -24,7 +21,6 @@ public class AgeCategoryCounterReducerFactory implements ReducerFactory<String, 
 
 			@Override
 			public Integer finalizeReduce() {
-//				System.out.println(String.format("FinalReduce for %s = %s", category, count));
 				return count;
 			}
 		};

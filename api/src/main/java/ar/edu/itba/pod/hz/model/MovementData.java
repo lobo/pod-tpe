@@ -57,4 +57,20 @@ public class MovementData implements DataSerializable {
 	public String getDestOACI() {
 		return destOACI;
 	}
+
+	public void setClasification(String clasification) {
+		this.clasification = clasification;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public void setOriginOACI(String originOACI) {
+		this.originOACI = originOACI;
+	}
+
+	public void setDestOACI(String destOACI) {
+		this.destOACI = destOACI;
+	}
 }

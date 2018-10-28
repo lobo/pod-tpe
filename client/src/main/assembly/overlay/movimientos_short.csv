@@ -1,0 +1,20 @@
+Fecha;Hora Movimiento HHMM;Clase de Vuelo;Clasificación Vuelo;Tipo de Movimiento;Origen OACI;Destino OACI;Aerolinea Nombre;Aeronave;Aeronave APC
+01/01/2015;00:00;No Regular;Cabotaje;Aterrizaje;SAWE;SADF;N/A;LEARJET LJ-60;C
+01/01/2015;00:02;No Regular;Cabotaje;Aterrizaje;SAVC;SAZN;American Jet;FAIRCHILD SW4;B
+01/01/2015;00:07;No Regular;Cabotaje;Aterrizaje;SAVC;SAZN;American Jet;DORNIER DO28;A
+01/01/2015;00:10;Regular;Internacional;Aterrizaje;SBGR;SABE;Gol Transportes Aéreos;BOEING B-737;D
+01/01/2015;00:13;Regular;Internacional;Despegue;SAEZ;KATL;Delta Air Lines;BOEING B-767;C
+01/01/2015;00:15;Regular;Cabotaje;Aterrizaje;SAME;SABE;Aerolíneas Argentinas;BOEING B-737;C
+01/01/2015;00:18;Regular;Internacional;Despegue;SAEZ;SBGL;Emirates Airline;BOEING B-777;C
+01/01/2015;00:25;Regular;Internacional;Despegue;SAEZ;SBGR;TAM Linhas Aéreas;AIRBUS A-320;C
+01/01/2015;00:25;No Regular;Cabotaje;Despegue;SAVC;SAZN;American Jet;FAIRCHILD SW4;B
+01/01/2015;00:32;Regular;Internacional;Aterrizaje;SVMI;SAEZ;Aerolíneas Argentinas;BOEING B-737;D
+01/01/2015;00:32;Regular;Cabotaje;Aterrizaje;SARI;SABE;Austral Líneas Aéreas;EMBRAER E-190;C
+01/01/2015;00:40;Regular;Internacional;Aterrizaje;SBPA;SAEZ;Gol Transportes Aéreos;BOEING B-737;D
+01/01/2015;00:40;Regular;Cabotaje;Aterrizaje;SASA;SABE;LATAM Argentina;AIRBUS A-320;C
+01/01/2015;00:43;No Regular;Cabotaje;Despegue;SAME;SACO;N/A;LEARJET LJ-35;C
+01/01/2015;00:44;Regular;Internacional;Despegue;SAEZ;SCEL;Sky Airline;AIRBUS A-320;C
+01/01/2015;00:54;Regular;Internacional;Despegue;SAEZ;KIAH;United Airlines;BOEING B-767;C
+01/01/2015;01:00;Regular;Internacional;Despegue;SAEZ;KJFK;American Airlines;BOEING B-777;C
+01/01/2015;01:01;Regular;Internacional;Despegue;SAEZ;SBGL;Aerolíneas Argentinas;BOEING B-737;C
+01/01/2015;01:01;Regular;Internacional;Aterrizaje;SCEL;SACO;LATAM;AIRBUS A-320;C

@@ -26,8 +26,8 @@ public class OtaParameter{
         try {
             OtaParameter ret = new OtaParameter();
 
-            ret.name = System.getProperty("name", "user");
-            ret.password = System.getProperty("password", "password");
+            ret.name = System.getProperty("name", "52539-53891");
+            ret.password = System.getProperty("password", "pass");
             String addrs = System.getProperty("addresses", "127.0.0.1");
             ret.addresses = addrs.split("[,;]");
 
@@ -35,7 +35,7 @@ public class OtaParameter{
             ret.query_number = Integer.valueOf(queryNumber);
 
             ret.airportsInPath = System.getProperty("airportsInPath","aeropuertos.csv");
-            ret.movementsInPath = System.getProperty("movementsInPath","movimientos.csv");
+            ret.movementsInPath = System.getProperty("movementsInPath","movimientos_short.csv");
             ret.outPath = System.getProperty("movementsInPath","");
             ret.timeOutPath = System.getProperty("movementsInPath","");
             if(ret.query_number == 1){
