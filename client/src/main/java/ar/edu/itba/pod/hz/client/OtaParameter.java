@@ -61,7 +61,7 @@ public class OtaParameter{
                 String mins = System.getProperty("min");
                 ret.min = Integer.valueOf(mins);
 
-            }else{
+            }else {
                 throw new Exception("Invalid query");
             }
             return ret;
