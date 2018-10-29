@@ -125,7 +125,10 @@ fabric.properties
 # .idea/misc.xml 
 # *.ipr
 .idea/*
-
+api/tpe-api.iml
+client/tpe-client.iml
+server/tpe-server.iml
+tpe-parent.iml
 
 
 ### Maven ###

@@ -2,16 +2,16 @@ package ar.edu.itba.pod.hz.client;
 
 import ar.edu.itba.pod.hz.client.reader.AirportsReader;
 import ar.edu.itba.pod.hz.client.reader.MovementsReader;
-import ar.edu.itba.pod.hz.model.AirportData;
-import ar.edu.itba.pod.hz.model.AirportTuple;
-import ar.edu.itba.pod.hz.model.BiIntegerTuple;
-import ar.edu.itba.pod.hz.model.MovementData;
+import ar.edu.itba.pod.hz.model.*;
 import ar.edu.itba.pod.hz.mr.query1.MovementCounterMapper;
 import ar.edu.itba.pod.hz.mr.query1.MovementCounterReducerFactory;
 //import ar.edu.itba.pod.hz.mr.query2.MovementCounterDividerReducerFactory;
 import ar.edu.itba.pod.hz.mr.query2.*;
 import ar.edu.itba.pod.hz.mr.query3.AirportTupleIntegerTupleReducerFactory;
 import ar.edu.itba.pod.hz.mr.query3.OriginDestinationMapper;
+import ar.edu.itba.pod.hz.mr.query6.MinCountCollator;
+import ar.edu.itba.pod.hz.mr.query6.ProvToProvMoveCounterMapper;
+import ar.edu.itba.pod.hz.mr.query6.ProvToProvMoveCounterReducerFactory;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.client.config.ClientNetworkConfig;
@@ -150,6 +150,7 @@ public class Client {
                 case 5:
                     break;
                 case 6:
+                    queryClient.query6(movementMap, airportsMap, p.getMin());
                     break;
             }
             logger.info("Terminado de procesar la query");
@@ -265,6 +266,49 @@ public class Client {
             this.outPath.println(atuple.getAirport1()+";"+atuple.getAirport2()+";"+ituple.getNumber1()+";"+ituple.getNumber2());
         }
         this.outPath.flush();
+    }
+
+    public void query6(IMap<Integer, MovementData> movementsMap, IMap<String, AirportData> airportsMap, Integer min) throws ExecutionException, InterruptedException {
+        JobTracker tracker = client.getJobTracker(JOB_TRACKER);
+
+        final String PROVINCES_MOVEMENTS_MAP = "LEGAJOS-PROVINCES";
+
+        // create map with province names
+        IMap<Integer, ProvinceTuple> provincesMovementsMap = this.client.getMap(PROVINCES_MOVEMENTS_MAP);
+
+        // Clear it in case it already exists
+        provincesMovementsMap.clear();
+
+        // Fill with entries from movementsMap with province names
+        for(Map.Entry<Integer, MovementData> entry : movementsMap.entrySet()) {
+            String originOACI = entry.getValue().getOriginOACI();
+            String destOACI = entry.getValue().getDestOACI();
+            AirportData originAirport = airportsMap.get(originOACI);
+            AirportData destAirport = airportsMap.get(destOACI);
+            if(originAirport != null && destAirport != null) {
+                provincesMovementsMap.set(entry.getKey(), new ProvinceTuple(originAirport.getProvince(), destAirport.getProvince()));
+            }
+        }
+
+        // Use created map as source for job
+        KeyValueSource<Integer, ProvinceTuple> source = KeyValueSource.fromMap(provincesMovementsMap);
+
+        // Create job
+        Job<Integer, ProvinceTuple> job = tracker.newJob(source);
+
+        // Submit map-reduce job
+        JobCompletableFuture<Map<ProvinceTuple, Integer>> futureResult = job.mapper(new ProvToProvMoveCounterMapper())
+                .reducer(new ProvToProvMoveCounterReducerFactory())
+                .submit(new MinCountCollator(min));
+
+        // Get map from result
+        Map<ProvinceTuple, Integer> result = futureResult.get();
+
+        System.out.println("Provincia A;Provincia B;Movimientos");
+        for(Map.Entry<ProvinceTuple, Integer> entry : result.entrySet()) {
+            ProvinceTuple tuple = entry.getKey();
+            System.out.println(tuple.getProvince1() + ";" + tuple.getProvince2() + ";" + entry.getValue());
+        }
     }
 
 
