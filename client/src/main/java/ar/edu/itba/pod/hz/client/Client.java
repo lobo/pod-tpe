@@ -1,15 +1,14 @@
 package ar.edu.itba.pod.hz.client;
 
-import ar.edu.itba.pod.collators.OrderByCollator;
 import ar.edu.itba.pod.hz.client.reader.AirportsReader;
 import ar.edu.itba.pod.hz.client.reader.MovementsReader;
 import ar.edu.itba.pod.hz.model.*;
 import ar.edu.itba.pod.hz.mr.query1.MovementCounterMapper;
 import ar.edu.itba.pod.hz.mr.query1.MovementCounterReducerFactory;
-//import ar.edu.itba.pod.hz.mr.query2.MovementCounterDividerReducerFactory;
 import ar.edu.itba.pod.hz.mr.query2.*;
 import ar.edu.itba.pod.hz.mr.query3.AirportTupleIntegerTupleReducerFactory;
 import ar.edu.itba.pod.hz.mr.query3.OriginDestinationMapper;
+import ar.edu.itba.pod.hz.mr.query4.OrderByCollator;
 import ar.edu.itba.pod.hz.mr.query5.MovementInternationalMapper;
 import ar.edu.itba.pod.hz.mr.query6.ProvToProvMoveCounterMapper;
 import ar.edu.itba.pod.hz.mr.query6.ProvToProvMoveCounterReducerFactory;
@@ -24,8 +23,6 @@ import com.hazelcast.mapreduce.Job;
 import com.hazelcast.mapreduce.JobCompletableFuture;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;

@@ -9,11 +9,17 @@ public class MovementCounterMapper implements Mapper<Integer, MovementData, Stri
 	public void map(final Integer keyinput, final MovementData valueinput, final Context<String, Integer> context) {
 		String originOACI = valueinput.getOriginOACI();
 		String destOACI = valueinput.getDestOACI();
+		String type = valueinput.getType();
+		if(type.equals("Despegue")){
+			/** Add movement in origin airport */
+			context.emit(originOACI, 1);
+		}else{
+			/** Add movement in destination airport */
+			context.emit(destOACI, 1);
+		}
 
-		/** Add movement in origin airport */
-		context.emit(originOACI, 1);
 
-		/** Add movement in destination airport */
-		context.emit(destOACI, 1);
+
+
 	}
 }

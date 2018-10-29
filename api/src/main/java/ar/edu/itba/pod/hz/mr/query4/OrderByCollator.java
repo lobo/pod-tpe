@@ -1,4 +1,5 @@
-package ar.edu.itba.pod.collators;
+package ar.edu.itba.pod.hz.mr.query4;
+
 
 import com.hazelcast.mapreduce.Collator;
 
