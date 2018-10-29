@@ -10,7 +10,7 @@ import ar.edu.itba.pod.hz.mr.query1.MovementCounterReducerFactory;
 import ar.edu.itba.pod.hz.mr.query2.*;
 import ar.edu.itba.pod.hz.mr.query3.AirportTupleIntegerTupleReducerFactory;
 import ar.edu.itba.pod.hz.mr.query3.OriginDestinationMapper;
-import ar.edu.itba.pod.hz.mr.query6.MinCountCollator;
+import ar.edu.itba.pod.hz.mr.query5.MovementInternationalMapper;
 import ar.edu.itba.pod.hz.mr.query6.ProvToProvMoveCounterMapper;
 import ar.edu.itba.pod.hz.mr.query6.ProvToProvMoveCounterReducerFactory;
 import ar.edu.itba.pod.hz.mr.query4.AirportLandingFromOaciMapper;
@@ -147,10 +147,11 @@ public class Client {
                 case 3:
                     queryClient.query3(movementMap);
                     break;
-                case 4: //TODO falta chequear orden y cantidad
+                case 4:
                     queryClient.query4(movementMap,p.getOaci(),p.getN());
                     break;
-                case 5:
+                case 5: //TODO falta sacar el porcentaje
+                    queryClient.query5(movementMap,airportsMap,p.getN());
                     break;
                 case 6:
                     queryClient.query6(movementMap, airportsMap, p.getMin());
@@ -255,6 +256,8 @@ public class Client {
 
         Job<Integer, MovementData> job = tracker.newJob(source);
 
+
+
         // Submit map-reduce job
         JobCompletableFuture<Map<AirportTuple, BiIntegerTuple>> futureResult = job.mapper(new OriginDestinationMapper())
                 .reducer(new AirportTupleIntegerTupleReducerFactory()).submit();
@@ -272,7 +275,7 @@ public class Client {
     }
 
     public void query4(IMap<Integer, MovementData> movementsMap,String oaci,Integer n) throws ExecutionException, InterruptedException {
-        int veces=0;
+        int q=0;
 
         JobTracker tracker = client.getJobTracker(JOB_TRACKER);
 
@@ -290,12 +293,48 @@ public class Client {
         List<Map.Entry<String, Integer>> result = futureResult.get();
         for(Map.Entry<String, Integer> entry : result) {
             this.outPath.println(entry.getKey()+";"+entry.getValue());
-            veces++; //TODO chequear
-            if(veces==n)
+            q++; //TODO chequear
+            if(q==n)
                 break;
         }
         this.outPath.flush();
     }
+
+    public void query5(IMap<Integer, MovementData> movementsMap, IMap<String, AirportData> airportsMap,Integer n) throws ExecutionException, InterruptedException {
+        int q=0;
+
+        // Find job tracker
+        JobTracker tracker = client.getJobTracker(JOB_TRACKER);
+
+        // Create source for first map-reduce job
+        KeyValueSource<Integer, MovementData> movements = KeyValueSource.fromMap(movementsMap);
+
+
+        // Create job
+        Job<Integer, MovementData> job = tracker.newJob(movements);
+
+        // Submit map-reduce job
+        JobCompletableFuture<List<Map.Entry<String, Integer>>> futureResult = job.mapper(new MovementInternationalMapper())
+                .reducer(new MovementCounterReducerFactory()).submit(new OrderByCollator<String,Integer>(false,false));
+
+        // Get map from result
+        List<Map.Entry<String, Integer>> result = futureResult.get();
+
+        // Iterate through entries to print them
+        this.outPath.println("IATA;Porcentaje");
+        for(Map.Entry<String,Integer> entry : result) {
+            AirportData ad=airportsMap.get(entry.getKey());
+            if(ad!=null){
+                this.outPath.println(ad.getIata()+';'+entry.getValue());
+                q++; //TODO chequear
+                if(q==n)
+                    break;
+            }
+
+        }
+        this.outPath.flush();
+    }
+
 
     public void query6(IMap<Integer, MovementData> movementsMap, IMap<String, AirportData> airportsMap, Integer min) throws ExecutionException, InterruptedException {
         JobTracker tracker = client.getJobTracker(JOB_TRACKER);
@@ -328,7 +367,7 @@ public class Client {
         // Submit map-reduce job
         JobCompletableFuture<Map<ProvinceTuple, Integer>> futureResult = job.mapper(new ProvToProvMoveCounterMapper())
                 .reducer(new ProvToProvMoveCounterReducerFactory())
-                .submit(new MinCountCollator(min));
+                .submit();
 
         // Get map from result
         Map<ProvinceTuple, Integer> result = futureResult.get();
