@@ -3,6 +3,7 @@ package ar.edu.itba.pod.hz.client;
 import ar.edu.itba.pod.hz.client.reader.AirportsReader;
 import ar.edu.itba.pod.hz.client.reader.MovementsReader;
 import ar.edu.itba.pod.hz.model.*;
+import ar.edu.itba.pod.hz.mr.quer2b.MovementCounterOverThousandsMapper;
 import ar.edu.itba.pod.hz.mr.query1.MovementCounterMapper;
 import ar.edu.itba.pod.hz.mr.query1.MovementCounterReducerFactory;
 import ar.edu.itba.pod.hz.mr.query2.*;
@@ -124,20 +125,24 @@ public class Client {
 
             IMap<String, AirportData> airportsMap = queryClient.client.getMap(AIRPORT_MAP_NAME);
             IMap<Integer, MovementData> movementMap = queryClient.client.getMap(MOVEMENT_MAP_NAME);
-            movementMap.clear();
+            if(p.getReload()){
+                logger.info("Cargando los aeropuertos");
+                try {
+                    AirportsReader.partialReadWithCsvBeanReader(airportsMap, queryClient.airportsInPath);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                logger.info("Cargando los movimientos");
+                movementMap.clear();
+                try {
+                    MovementsReader.partialReadWithCsvBeanReader(movementMap, queryClient.movementsInPath);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }else{
+                logger.info("Omitiendo la carga de los CSV");
+            }
 
-            logger.info("Cargando los aeropuertos");
-            try {
-                AirportsReader.partialReadWithCsvBeanReader(airportsMap, queryClient.airportsInPath);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            logger.info("Cargando los movimientos");
-            try {
-                MovementsReader.partialReadWithCsvBeanReader(movementMap, queryClient.movementsInPath);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
             logger.info("Procesando la query");
             switch (p.getQuery_number()) {
                 case 1:
@@ -209,7 +214,7 @@ public class Client {
 
         // Submit first map-reduce job
         ICompletableFuture<Map<String, Integer>> intermediateFutureResult = job.mapper(new MovementCounterMapper())
-                .reducer(new MovementCounterDividerReducerFactory()).submit();
+                .reducer(new MovementCounterReducerFactory()).submit();
 
         // Create local intermediate map
         Map<String, Integer> intermediateResult = intermediateFutureResult.get();
@@ -232,7 +237,7 @@ public class Client {
         Job<String, Integer> job2 = tracker.newJob(source2);
 
         // Submit second map-reduce job
-        ICompletableFuture<Map<Integer, List<AirportTuple>>> futureResult = job2.mapper(new SwapKeyValueMapper())
+        ICompletableFuture<Map<Integer, List<AirportTuple>>> futureResult = job2.mapper(new MovementCounterOverThousandsMapper())
                 .reducer(new SameKeyGrouperReducerFactory()).submit();
 
         // Get map from result
@@ -243,7 +248,7 @@ public class Client {
         for(Map.Entry<Integer, List<AirportTuple>> entry : result.entrySet()) {
             Integer millennium = entry.getKey();
             for(AirportTuple tuple : entry.getValue()) {
-                this.outPath.println((millennium*1000) + ";" + tuple.getAirport1() + ";" + tuple.getAirport2());
+                this.outPath.println((millennium) + ";" + tuple.getAirport1() + ";" + tuple.getAirport2());
             }
         }
     }

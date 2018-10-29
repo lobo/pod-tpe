@@ -1,5 +1,7 @@
 package ar.edu.itba.pod.hz.client;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
 public class Parameter {
 
     private String name;
@@ -12,6 +14,8 @@ public class Parameter {
     private String movementsInPath;
     private String outPath;
     private String timeOutPath;
+
+    private Boolean reload;
 
     private String oaci;
     private int n;
@@ -31,8 +35,14 @@ public class Parameter {
             String addrs = System.getProperty("addresses", "127.0.0.1");
             ret.addresses = addrs.split("[,;]");
 
-            String queryNumber = System.getProperty("query");
+            String queryNumber = System.getProperty("query","-1");
             ret.query_number = Integer.valueOf(queryNumber);
+            if(ret.query_number==-1){
+                throw new Exception("El numero de query es obligatorio");
+            }
+
+            String sReload = System.getProperty("reload","true");
+            ret.reload = Boolean.valueOf(sReload);
 
             ret.airportsInPath = System.getProperty("airportsInPath","aeropuertos.csv");
             ret.movementsInPath = System.getProperty("movementsInPath","movimientos_short.csv");
@@ -67,7 +77,7 @@ public class Parameter {
             return ret;
 
         } catch (Exception e) {
-            System.out.println("Error in parameters.");
+            System.out.println("Error en los parametros.");
             System.exit(1);
         }
         return null;
@@ -117,4 +127,6 @@ public class Parameter {
     public int getMin() {
         return min;
     }
+
+    public boolean getReload(){return reload;}
 }
