@@ -6,7 +6,7 @@ import com.hazelcast.nio.serialization.DataSerializable;
 
 import java.io.IOException;
 
-public class BiIntegerTuple implements DataSerializable {
+public class BiIntegerTuple implements DataSerializable, Comparable<BiIntegerTuple> {
     private Integer number1 = 0;
     private Integer number2 = 0;
 
@@ -50,5 +50,14 @@ public class BiIntegerTuple implements DataSerializable {
     public void addTuple(BiIntegerTuple tuple){
         this.number1+=tuple.getNumber1();
         this.number2+=tuple.getNumber2();
+    }
+
+    @Override
+    public int compareTo(BiIntegerTuple o) {
+        if(this.number1.equals(o.getNumber1()))
+            return this.number2.compareTo(o.getNumber2());
+        else
+            return this.number1.compareTo(o.getNumber1());
+
     }
 }

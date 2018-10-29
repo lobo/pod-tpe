@@ -9,7 +9,7 @@ import java.io.IOException;
 /**
  * Created by giulianoscaglioni on 28/10/18.
  */
-public class AirportTuple implements DataSerializable {
+public class AirportTuple implements DataSerializable,Comparable<AirportTuple> {
     private String airport1;
     private String airport2;
 
@@ -76,5 +76,13 @@ public class AirportTuple implements DataSerializable {
 
     public void setAirport2(String airport2) {
         this.airport2 = airport2;
+    }
+
+    @Override
+    public int compareTo(AirportTuple o) {
+        if(this.airport1.equals(o.getAirport1()))
+            return this.airport2.compareTo(o.getAirport2());
+        else
+            return this.airport1.compareTo(o.getAirport1());
     }
 }

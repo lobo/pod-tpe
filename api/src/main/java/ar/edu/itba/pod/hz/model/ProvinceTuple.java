@@ -9,7 +9,7 @@ import java.io.IOException;
 /**
  * Created by giulianoscaglioni on 28/10/18.
  */
-public class ProvinceTuple implements DataSerializable {
+public class ProvinceTuple implements DataSerializable,Comparable<ProvinceTuple> {
     private String province1;
     private String province2;
 
@@ -71,5 +71,13 @@ public class ProvinceTuple implements DataSerializable {
         int result = province1.hashCode();
         result = 31 * result + province2.hashCode();
         return result;
+    }
+
+    @Override
+    public int compareTo(ProvinceTuple o) {
+        if(this.province1.equals(o.getProvince1()))
+            return this.province2.compareTo(o.getProvince2());
+        else
+            return this.province1.compareTo(o.getProvince1());
     }
 }

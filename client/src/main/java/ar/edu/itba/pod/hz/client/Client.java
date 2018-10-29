@@ -9,6 +9,7 @@ import ar.edu.itba.pod.hz.mr.query2.*;
 import ar.edu.itba.pod.hz.mr.query3.AirportTupleIntegerTupleReducerFactory;
 import ar.edu.itba.pod.hz.mr.query3.OriginDestinationMapper;
 import ar.edu.itba.pod.hz.mr.query4.OrderByCollator;
+import ar.edu.itba.pod.hz.mr.query4.OrderKeyAndValueCollator;
 import ar.edu.itba.pod.hz.mr.query5.MovementInternationalMapper;
 import ar.edu.itba.pod.hz.mr.query6.ProvToProvMoveCounterMapper;
 import ar.edu.itba.pod.hz.mr.query6.ProvToProvMoveCounterReducerFactory;
@@ -23,6 +24,8 @@ import com.hazelcast.mapreduce.Job;
 import com.hazelcast.mapreduce.JobCompletableFuture;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
+
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -35,6 +38,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
+import static java.lang.Math.floor;
 
 public class Client {
 
@@ -84,7 +89,7 @@ public class Client {
         else
             this.outPath = new PrintWriter(outPath, "UTF-8");
         this.logger.setUseParentHandlers(false);
-        if(timeOutPath.equals("")){ // logging file
+        if(timeOutPath.equals("")){ // console logger
             Handler h = new ConsoleHandler();
             h.setFormatter(new Frmt());
             this.logger.addHandler(h);
@@ -138,7 +143,7 @@ public class Client {
                 case 1:
                     queryClient.query1(movementMap, airportsMap);
                     break;
-                case 2:
+                case 2: //TODO corregir
                     queryClient.query2(movementMap);
                     break;
                 case 3:
@@ -147,14 +152,15 @@ public class Client {
                 case 4:
                     queryClient.query4(movementMap,p.getOaci(),p.getN());
                     break;
-                case 5: //TODO falta sacar el porcentaje
+                case 5:
                     queryClient.query5(movementMap,airportsMap,p.getN());
                     break;
-                case 6:
+                case 6: //TODO ordernar y comparable
                     queryClient.query6(movementMap, airportsMap, p.getMin());
                     break;
             }
             logger.info("Terminado de procesar la query");
+            queryClient.outPath.flush();
             queryClient.outPath.close();
             System.exit(0);
         } catch (Exception e) {
@@ -170,19 +176,18 @@ public class Client {
         KeyValueSource<Integer, MovementData> source = KeyValueSource.fromMap(movementsMap);
         Job<Integer, MovementData> job = tracker.newJob(source);
 
-        ICompletableFuture<Map<String, Integer>> futureResult = job.mapper(new MovementCounterMapper())
-                .reducer(new MovementCounterReducerFactory()).submit();
+        JobCompletableFuture<List<Map.Entry<String, Integer>>> futureResult = job.mapper(new MovementCounterMapper())
+                .reducer(new MovementCounterReducerFactory()).submit(new OrderKeyAndValueCollator<>(false,true,false));
 
-        Map<String, Integer> result = futureResult.get();
+        List<Map.Entry<String, Integer>> result = futureResult.get();
 
         this.outPath.println("OACI;Denominación;Movimientos");
-        for(Map.Entry<String, Integer> airport : result.entrySet()) {
+        for(Map.Entry<String, Integer> airport : result) {
             AirportData airportData = airportsMap.get(airport.getKey());
             if(airportData != null) {
                 this.outPath.println(airport.getKey() + ";" + airportData.getDenomination() +  ";" + airport.getValue());
             }
         }
-        this.outPath.flush();
 
     }
 
@@ -241,7 +246,6 @@ public class Client {
                 this.outPath.println((millennium*1000) + ";" + tuple.getAirport1() + ";" + tuple.getAirport2());
             }
         }
-        this.outPath.flush();
     }
 
     public void query3(IMap<Integer, MovementData> movementsMap) throws ExecutionException, InterruptedException {
@@ -254,21 +258,19 @@ public class Client {
         Job<Integer, MovementData> job = tracker.newJob(source);
 
 
-
         // Submit map-reduce job
-        JobCompletableFuture<Map<AirportTuple, BiIntegerTuple>> futureResult = job.mapper(new OriginDestinationMapper())
-                .reducer(new AirportTupleIntegerTupleReducerFactory()).submit();
+        JobCompletableFuture<List<Map.Entry<AirportTuple, BiIntegerTuple>>> futureResult = job.mapper(new OriginDestinationMapper())
+                .reducer(new AirportTupleIntegerTupleReducerFactory()).submit(new OrderByCollator<AirportTuple, BiIntegerTuple>(true,true));
 
         // Get map from result
-        Map<AirportTuple, BiIntegerTuple> result = futureResult.get();
+        List<Map.Entry<AirportTuple, BiIntegerTuple>> result = futureResult.get();
 
         this.outPath.println("Origen;Destino;Origen->Destino;Destino->Origen");
-        for(Map.Entry<AirportTuple, BiIntegerTuple> entry : result.entrySet()){
+        for(Map.Entry<AirportTuple, BiIntegerTuple> entry : result){
             AirportTuple atuple=entry.getKey();
             BiIntegerTuple ituple=entry.getValue();
             this.outPath.println(atuple.getAirport1()+";"+atuple.getAirport2()+";"+ituple.getNumber1()+";"+ituple.getNumber2());
         }
-        this.outPath.flush();
     }
 
     public void query4(IMap<Integer, MovementData> movementsMap,String oaci,Integer n) throws ExecutionException, InterruptedException {
@@ -282,7 +284,7 @@ public class Client {
 
         // Submit map-reduce job
         JobCompletableFuture<List<Map.Entry<String, Integer>>> futureResult = job.mapper(new AirportLandingFromOaciMapper(oaci))
-                .reducer(new MovementCounterReducerFactory()).submit(new OrderByCollator<String,Integer>(false,false));
+                .reducer(new MovementCounterReducerFactory()).submit(new OrderKeyAndValueCollator<>(false,true,false));
 
         // Get map from result
         this.outPath.println("OACI;Aterrizajes");
@@ -294,7 +296,6 @@ public class Client {
             if(q==n)
                 break;
         }
-        this.outPath.flush();
     }
 
     public void query5(IMap<Integer, MovementData> movementsMap, IMap<String, AirportData> airportsMap,Integer n) throws ExecutionException, InterruptedException {
@@ -312,7 +313,7 @@ public class Client {
 
         // Submit map-reduce job
         JobCompletableFuture<List<Map.Entry<String, Integer>>> futureResult = job.mapper(new MovementInternationalMapper())
-                .reducer(new MovementCounterReducerFactory()).submit(new OrderByCollator<String,Integer>(false,false));
+                .reducer(new MovementCounterReducerFactory()).submit(new OrderKeyAndValueCollator<>(false,true,false));
 
         // Get map from result
         List<Map.Entry<String, Integer>> result = futureResult.get();
@@ -320,22 +321,22 @@ public class Client {
         // Iterate through entries to print them
         this.outPath.println("IATA;Porcentaje");
 
-        Integer total=1;
+        double total=1.0;
         for(Map.Entry<String,Integer> entry : result) {
             if(entry.getKey().equals("")){
-                total=entry.getValue();
+                total= Float.valueOf(entry.getValue());
                 continue;
             }
             AirportData ad=airportsMap.get(entry.getKey());
             if(ad!=null){
-                this.outPath.println(ad.getIata()+';'+entry.getValue()/total);
+                double percentage=entry.getValue()/total*100;
+                this.outPath.println(ad.getIata()+';'+(int)floor(percentage)+'%');
                 q++; //TODO chequear
                 if(q==n)
                     break;
             }
 
         }
-        this.outPath.flush();
     }
 
 
@@ -368,19 +369,18 @@ public class Client {
         Job<Integer, ProvinceTuple> job = tracker.newJob(source);
 
         // Submit map-reduce job
-        JobCompletableFuture<Map<ProvinceTuple, Integer>> futureResult = job.mapper(new ProvToProvMoveCounterMapper())
+        JobCompletableFuture<List<Map.Entry<ProvinceTuple, Integer>>> futureResult = job.mapper(new ProvToProvMoveCounterMapper())
                 .reducer(new ProvToProvMoveCounterReducerFactory())
-                .submit();
+                .submit(new OrderKeyAndValueCollator<ProvinceTuple,Integer>(false,true,false));
 
         // Get map from result
-        Map<ProvinceTuple, Integer> result = futureResult.get();
+        List<Map.Entry<ProvinceTuple, Integer>> result = futureResult.get();
 
         this.outPath.println("Provincia A;Provincia B;Movimientos");
-        for(Map.Entry<ProvinceTuple, Integer> entry : result.entrySet()) {
+        for(Map.Entry<ProvinceTuple, Integer> entry : result) {
             ProvinceTuple tuple = entry.getKey();
             this.outPath.println(tuple.getProvince1() + ";" + tuple.getProvince2() + ";" + entry.getValue());
         }
-        this.outPath.flush();
     }
 
 
