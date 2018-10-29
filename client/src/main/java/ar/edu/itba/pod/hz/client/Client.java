@@ -4,12 +4,14 @@ import ar.edu.itba.pod.hz.client.reader.AirportsReader;
 import ar.edu.itba.pod.hz.client.reader.MovementsReader;
 import ar.edu.itba.pod.hz.model.AirportData;
 import ar.edu.itba.pod.hz.model.AirportTuple;
+import ar.edu.itba.pod.hz.model.BiIntegerTuple;
 import ar.edu.itba.pod.hz.model.MovementData;
 import ar.edu.itba.pod.hz.mr.query1.MovementCounterMapper;
 import ar.edu.itba.pod.hz.mr.query1.MovementCounterReducerFactory;
-import ar.edu.itba.pod.hz.mr.query2.MovementCounterDividerReducerFactory;
-import ar.edu.itba.pod.hz.mr.query2.SameKeyGrouperReducerFactory;
-import ar.edu.itba.pod.hz.mr.query2.SwapKeyValueMapper;
+//import ar.edu.itba.pod.hz.mr.query2.MovementCounterDividerReducerFactory;
+import ar.edu.itba.pod.hz.mr.query2.*;
+import ar.edu.itba.pod.hz.mr.query3.AirportTupleIntegerTupleReducerFactory;
+import ar.edu.itba.pod.hz.mr.query3.OriginDestinationMapper;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.client.config.ClientNetworkConfig;
@@ -17,12 +19,18 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ICompletableFuture;
 import com.hazelcast.core.IMap;
 import com.hazelcast.mapreduce.Job;
+import com.hazelcast.mapreduce.JobCompletableFuture;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.logging.*;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -30,6 +38,30 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class Client {
+
+
+    class Frmt extends Formatter {
+        private final DateFormat df = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss:SSSS");
+
+        public String format(LogRecord record) {
+            StringBuilder builder = new StringBuilder(1000);
+            builder.append(df.format(new Date(record.getMillis()))).append(" - ");
+            builder.append("[").append(record.getSourceClassName()).append(".");
+            builder.append(record.getSourceMethodName()).append("] - ");
+            builder.append("[").append(record.getLevel()).append("] - ");
+            builder.append(formatMessage(record));
+            builder.append("\n");
+            return builder.toString();
+        }
+
+        public String getHead(Handler h) {
+            return super.getHead(h);
+        }
+
+        public String getTail(Handler h) {
+            return super.getTail(h);
+        }
+    }
 
     private final String JOB_TRACKER = "default";
 
@@ -39,12 +71,12 @@ public class Client {
     private String movementsInPath;
 
     private PrintWriter outPath;
-    private PrintWriter timeOutPath;
+    private FileHandler FhtimeOutPath;
 
+    private  static Logger logger =  Logger.getLogger("Client");;
 
     public Client(ClientConfig ccfg, String airportsInPath, String movementsInPath, String outPath, String timeOutPath)
-            throws FileNotFoundException, UnsupportedEncodingException {
-        super();
+            throws IOException {
         this.client = HazelcastClient.newHazelcastClient(ccfg);
         this.airportsInPath = airportsInPath;
         this.movementsInPath = movementsInPath;
@@ -52,21 +84,29 @@ public class Client {
             this.outPath = new PrintWriter(System.out);
         else
             this.outPath = new PrintWriter(outPath, "UTF-8");
-        if(timeOutPath.equals(""))
-            this.timeOutPath = new PrintWriter(System.err);
-        else
-            this.timeOutPath = new PrintWriter(timeOutPath,"UTF-8");
+        if(!timeOutPath.equals("")){ // logging file
+            this.FhtimeOutPath = new FileHandler(timeOutPath);
+            this.FhtimeOutPath.setFormatter(new Frmt());
+            this.logger.addHandler(this.FhtimeOutPath);
+//        }else{ //TODO FIX FORMAT
+//            Handler h = new ConsoleHandler();
+//            h.setFormatter(new Frmt());
+//            this.logger.addHandler(h);
+        }
+
+
+
 
     }
 
     private static final String AIRPORT_MAP_NAME = "G3-2018-AIR";
     private static final String MOVEMENT_MAP_NAME = "G3-2018-MOV";
 
-    private static Logger logger = LoggerFactory.getLogger(Client.class); // TODO CHECK
+
 
     public static void main(String[] args) {
         try{
-            OtaParameter p = OtaParameter.loadParameters();
+            Parameter p = Parameter.loadParameters();
             ClientConfig ccfg = new ClientConfig();
             ccfg.getGroupConfig().setName(p.getName()).setPassword(p.getPassword());
 
@@ -80,18 +120,19 @@ public class Client {
             IMap<Integer, MovementData> movementMap = queryClient.client.getMap(MOVEMENT_MAP_NAME);
             movementMap.clear();
 
-            logger.info("Inicio del aeropuerto");
+            logger.info("Cargando los aeropuertos");
             try {
                 AirportsReader.partialReadWithCsvBeanReader(airportsMap, queryClient.airportsInPath);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-            logger.info("Inicio de movimientos");
+            logger.info("Cargando los movimientos");
             try {
                 MovementsReader.partialReadWithCsvBeanReader(movementMap, queryClient.movementsInPath);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+            logger.info("Procesando la query");
             switch (p.getQuery_number()) {
                 case 1:
                     queryClient.query1(movementMap, airportsMap);
@@ -100,6 +141,7 @@ public class Client {
                     queryClient.query2(movementMap);
                     break;
                 case 3:
+                    queryClient.query3(movementMap);
                     break;
                 case 4:
                     break;
@@ -108,6 +150,7 @@ public class Client {
                 case 6:
                     break;
             }
+            logger.info("Terminado de procesar la query");
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -134,6 +177,8 @@ public class Client {
             }
         }
     }
+
+
 
     public void query2(IMap<Integer, MovementData> movementsMap)
             throws InterruptedException, ExecutionException, FileNotFoundException, UnsupportedEncodingException {
@@ -189,5 +234,32 @@ public class Client {
             }
         }
     }
+
+    public void query3(IMap<Integer, MovementData> movementsMap) throws ExecutionException, InterruptedException {
+
+
+        JobTracker tracker = client.getJobTracker(JOB_TRACKER);
+
+        KeyValueSource<Integer, MovementData> source = KeyValueSource.fromMap(movementsMap);
+
+        Job<Integer, MovementData> job = tracker.newJob(source);
+
+        // Submit map-reduce job
+        JobCompletableFuture<Map<AirportTuple, BiIntegerTuple>> futureResult = job.mapper(new OriginDestinationMapper())
+                .reducer(new AirportTupleIntegerTupleReducerFactory()).submit();
+
+        // Get map from result
+        Map<AirportTuple, BiIntegerTuple> result = futureResult.get();
+
+        System.out.println("Origen;Destino;Origen->Destino;Destino->Origen");
+        for(Map.Entry<AirportTuple, BiIntegerTuple> entry : result.entrySet()){
+            AirportTuple atuple=entry.getKey();
+            BiIntegerTuple ituple=entry.getValue();
+            System.out.println(atuple.getAirport1()+";"+atuple.getAirport2()+";"+ituple.getNumber1()+";"+ituple.getNumber2());
+        }
+    }
+
+
+
 
 }

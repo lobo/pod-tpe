@@ -1,6 +1,6 @@
 package ar.edu.itba.pod.hz.client;
 
-public class OtaParameter{
+public class Parameter {
 
     private String name;
     private String password;
@@ -17,14 +17,14 @@ public class OtaParameter{
     private int n;
     private int min;
 
-    public OtaParameter(){ //default config
+    public Parameter(){ //default config
         this.name="user"; //TODO FIX BY ENUNCIADO CHE
         this.password="password";
     }
 
-    public static OtaParameter loadParameters() {
+    public static Parameter loadParameters() {
         try {
-            OtaParameter ret = new OtaParameter();
+            Parameter ret = new Parameter();
 
             ret.name = System.getProperty("name", "52539-53891");
             ret.password = System.getProperty("password", "pass");
@@ -37,7 +37,7 @@ public class OtaParameter{
             ret.airportsInPath = System.getProperty("airportsInPath","aeropuertos.csv");
             ret.movementsInPath = System.getProperty("movementsInPath","movimientos_short.csv");
             ret.outPath = System.getProperty("movementsInPath","");
-            ret.timeOutPath = System.getProperty("movementsInPath","");
+            ret.timeOutPath = System.getProperty("timeOutPath","");
             if(ret.query_number == 1){
                 //ninguno
             }else if(ret.query_number == 2){

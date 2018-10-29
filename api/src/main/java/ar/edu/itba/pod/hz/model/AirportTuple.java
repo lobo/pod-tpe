@@ -16,6 +16,8 @@ public class AirportTuple implements DataSerializable {
     // for hazelcast
     public AirportTuple() {
         super();
+        airport1="";
+        airport2="";
     }
 
     public AirportTuple(String airport1, String airport2) {
@@ -49,6 +51,23 @@ public class AirportTuple implements DataSerializable {
                 "airport1='" + airport1 + '\'' +
                 ", airport2='" + airport2 + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == this){
+            return true;
+        }
+        if(!(obj instanceof AirportTuple)){
+            return false;
+        }
+        return this.airport1.equals(((AirportTuple) obj).getAirport1()) &&
+                this.airport2.equals(((AirportTuple) obj).getAirport2());
+    }
+
+    @Override
+    public int hashCode() {
+        return (airport1+"///"+airport2).hashCode();
     }
 
     public String getAirport2() {
