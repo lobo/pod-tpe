@@ -84,14 +84,16 @@ public class Client {
             this.outPath = new PrintWriter(System.out);
         else
             this.outPath = new PrintWriter(outPath, "UTF-8");
-        if(!timeOutPath.equals("")){ // logging file
+        this.logger.setUseParentHandlers(false);
+        if(timeOutPath.equals("")){ // logging file
+            Handler h = new ConsoleHandler();
+            h.setFormatter(new Frmt());
+            this.logger.addHandler(h);
+        }else{ //TODO FIX FORMAT
+
             this.FhtimeOutPath = new FileHandler(timeOutPath);
             this.FhtimeOutPath.setFormatter(new Frmt());
             this.logger.addHandler(this.FhtimeOutPath);
-//        }else{ //TODO FIX FORMAT
-//            Handler h = new ConsoleHandler();
-//            h.setFormatter(new Frmt());
-//            this.logger.addHandler(h);
         }
 
 
@@ -151,6 +153,8 @@ public class Client {
                     break;
             }
             logger.info("Terminado de procesar la query");
+            queryClient.outPath.close();
+            System.exit(0);
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -169,13 +173,15 @@ public class Client {
 
         Map<String, Integer> result = futureResult.get();
 
-        System.out.println("OACI;Denominación;Movimientos");
+        this.outPath.println("OACI;Denominación;Movimientos");
         for(Map.Entry<String, Integer> airport : result.entrySet()) {
             AirportData airportData = airportsMap.get(airport.getKey());
             if(airportData != null) {
-                System.out.println(airport.getKey() + ";" + airportData.getDenomination() +  ";" + airport.getValue());
+                this.outPath.println(airport.getKey() + ";" + airportData.getDenomination() +  ";" + airport.getValue());
             }
         }
+        this.outPath.flush();
+
     }
 
 
@@ -226,13 +232,14 @@ public class Client {
         Map<Integer, List<AirportTuple>> result = futureResult.get();
 
         // Iterate through entries to print them
-        System.out.println("Grupo;Aeropuerto A;Aeropuerto B");
+        this.outPath.println("Grupo;Aeropuerto A;Aeropuerto B");
         for(Map.Entry<Integer, List<AirportTuple>> entry : result.entrySet()) {
             Integer millennium = entry.getKey();
             for(AirportTuple tuple : entry.getValue()) {
-                System.out.println((millennium*1000) + ";" + tuple.getAirport1() + ";" + tuple.getAirport2());
+                this.outPath.println((millennium*1000) + ";" + tuple.getAirport1() + ";" + tuple.getAirport2());
             }
         }
+        this.outPath.flush();
     }
 
     public void query3(IMap<Integer, MovementData> movementsMap) throws ExecutionException, InterruptedException {
@@ -251,12 +258,13 @@ public class Client {
         // Get map from result
         Map<AirportTuple, BiIntegerTuple> result = futureResult.get();
 
-        System.out.println("Origen;Destino;Origen->Destino;Destino->Origen");
+        this.outPath.println("Origen;Destino;Origen->Destino;Destino->Origen");
         for(Map.Entry<AirportTuple, BiIntegerTuple> entry : result.entrySet()){
             AirportTuple atuple=entry.getKey();
             BiIntegerTuple ituple=entry.getValue();
-            System.out.println(atuple.getAirport1()+";"+atuple.getAirport2()+";"+ituple.getNumber1()+";"+ituple.getNumber2());
+            this.outPath.println(atuple.getAirport1()+";"+atuple.getAirport2()+";"+ituple.getNumber1()+";"+ituple.getNumber2());
         }
+        this.outPath.flush();
     }
 
 
