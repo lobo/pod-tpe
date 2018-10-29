@@ -67,7 +67,7 @@ public class AirportTuple implements DataSerializable {
 
     @Override
     public int hashCode() {
-        return (airport1+"///"+airport2).hashCode();
+        return ("1"+airport1+"/"+airport2+"2").hashCode();
     }
 
     public String getAirport2() {
