@@ -1,5 +1,6 @@
 package ar.edu.itba.pod.hz.client;
 
+import ar.edu.itba.pod.collators.OrderByCollator;
 import ar.edu.itba.pod.hz.client.reader.AirportsReader;
 import ar.edu.itba.pod.hz.client.reader.MovementsReader;
 import ar.edu.itba.pod.hz.model.*;
@@ -271,6 +272,7 @@ public class Client {
     }
 
     public void query4(IMap<Integer, MovementData> movementsMap,String oaci,Integer n) throws ExecutionException, InterruptedException {
+        int veces=0;
 
         JobTracker tracker = client.getJobTracker(JOB_TRACKER);
 
@@ -279,14 +281,18 @@ public class Client {
         Job<Integer, MovementData> job = tracker.newJob(source);
 
         // Submit map-reduce job
-        JobCompletableFuture<Map<String, Integer>> futureResult = job.mapper(new AirportLandingFromOaciMapper(oaci))
-                .reducer(new MovementCounterReducerFactory()).submit();
+        JobCompletableFuture<List<Map.Entry<String, Integer>>> futureResult = job.mapper(new AirportLandingFromOaciMapper(oaci))
+                .reducer(new MovementCounterReducerFactory()).submit(new OrderByCollator<String,Integer>(false,false));
 
         // Get map from result
         this.outPath.println("OACI;Aterrizajes");
-        Map<String, Integer> result = futureResult.get();
-        for(Map.Entry<String, Integer> entry : result.entrySet()) {
+
+        List<Map.Entry<String, Integer>> result = futureResult.get();
+        for(Map.Entry<String, Integer> entry : result) {
             this.outPath.println(entry.getKey()+";"+entry.getValue());
+            veces++; //TODO chequear
+            if(veces==n)
+                break;
         }
         this.outPath.flush();
     }
