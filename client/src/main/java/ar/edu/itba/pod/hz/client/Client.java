@@ -319,10 +319,16 @@ public class Client {
 
         // Iterate through entries to print them
         this.outPath.println("IATA;Porcentaje");
+
+        Integer total=1;
         for(Map.Entry<String,Integer> entry : result) {
+            if(entry.getKey().equals("")){
+                total=entry.getValue();
+                continue;
+            }
             AirportData ad=airportsMap.get(entry.getKey());
             if(ad!=null){
-                this.outPath.println(ad.getIata()+';'+entry.getValue());
+                this.outPath.println(ad.getIata()+';'+entry.getValue()/total);
                 q++; //TODO chequear
                 if(q==n)
                     break;

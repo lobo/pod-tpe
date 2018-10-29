@@ -18,8 +18,5 @@ public class MovementCounterMapper implements Mapper<Integer, MovementData, Stri
 			context.emit(destOACI, 1);
 		}
 
-
-
-
 	}
 }
