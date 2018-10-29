@@ -12,6 +12,7 @@ import ar.edu.itba.pod.hz.mr.query3.OriginDestinationMapper;
 import ar.edu.itba.pod.hz.mr.query6.MinCountCollator;
 import ar.edu.itba.pod.hz.mr.query6.ProvToProvMoveCounterMapper;
 import ar.edu.itba.pod.hz.mr.query6.ProvToProvMoveCounterReducerFactory;
+import ar.edu.itba.pod.hz.mr.query4.AirportLandingFromOaciMapper;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
 import com.hazelcast.client.config.ClientNetworkConfig;
@@ -41,7 +42,7 @@ public class Client {
 
 
     class Frmt extends Formatter {
-        private final DateFormat df = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss:SSSS");
+        private final DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss:SSSS");
 
         public String format(LogRecord record) {
             StringBuilder builder = new StringBuilder(1000);
@@ -145,7 +146,8 @@ public class Client {
                 case 3:
                     queryClient.query3(movementMap);
                     break;
-                case 4:
+                case 4: //TODO falta chequear orden y cantidad
+                    queryClient.query4(movementMap,p.getOaci(),p.getN());
                     break;
                 case 5:
                     break;
@@ -268,6 +270,27 @@ public class Client {
         this.outPath.flush();
     }
 
+    public void query4(IMap<Integer, MovementData> movementsMap,String oaci,Integer n) throws ExecutionException, InterruptedException {
+
+        JobTracker tracker = client.getJobTracker(JOB_TRACKER);
+
+        KeyValueSource<Integer, MovementData> source = KeyValueSource.fromMap(movementsMap);
+
+        Job<Integer, MovementData> job = tracker.newJob(source);
+
+        // Submit map-reduce job
+        JobCompletableFuture<Map<String, Integer>> futureResult = job.mapper(new AirportLandingFromOaciMapper(oaci))
+                .reducer(new MovementCounterReducerFactory()).submit();
+
+        // Get map from result
+        this.outPath.println("OACI;Aterrizajes");
+        Map<String, Integer> result = futureResult.get();
+        for(Map.Entry<String, Integer> entry : result.entrySet()) {
+            this.outPath.println(entry.getKey()+";"+entry.getValue());
+        }
+        this.outPath.flush();
+    }
+
     public void query6(IMap<Integer, MovementData> movementsMap, IMap<String, AirportData> airportsMap, Integer min) throws ExecutionException, InterruptedException {
         JobTracker tracker = client.getJobTracker(JOB_TRACKER);
 
@@ -304,11 +327,12 @@ public class Client {
         // Get map from result
         Map<ProvinceTuple, Integer> result = futureResult.get();
 
-        System.out.println("Provincia A;Provincia B;Movimientos");
+        this.outPath.println("Provincia A;Provincia B;Movimientos");
         for(Map.Entry<ProvinceTuple, Integer> entry : result.entrySet()) {
             ProvinceTuple tuple = entry.getKey();
-            System.out.println(tuple.getProvince1() + ";" + tuple.getProvince2() + ";" + entry.getValue());
+            this.outPath.println(tuple.getProvince1() + ";" + tuple.getProvince2() + ";" + entry.getValue());
         }
+        this.outPath.flush();
     }
 
 
