@@ -126,6 +126,7 @@ public class Client {
             IMap<String, AirportData> airportsMap = queryClient.client.getMap(AIRPORT_MAP_NAME);
             IMap<Integer, MovementData> movementMap = queryClient.client.getMap(MOVEMENT_MAP_NAME);
             if(p.getReload()){
+//                movementMap.clear();
                 logger.info("Cargando los aeropuertos");
                 try {
                     AirportsReader.partialReadWithCsvBeanReader(airportsMap, queryClient.airportsInPath);
@@ -133,7 +134,6 @@ public class Client {
                     throw new RuntimeException(e);
                 }
                 logger.info("Cargando los movimientos");
-                movementMap.clear();
                 try {
                     MovementsReader.partialReadWithCsvBeanReader(movementMap, queryClient.movementsInPath);
                 } catch (Exception e) {
@@ -166,7 +166,6 @@ public class Client {
             }
             logger.info("Terminado de procesar la query");
             queryClient.outPath.flush();
-            queryClient.outPath.close();
             System.exit(0);
         } catch (Exception e) {
             System.out.println(e);
@@ -237,15 +236,15 @@ public class Client {
         Job<String, Integer> job2 = tracker.newJob(source2);
 
         // Submit second map-reduce job
-        ICompletableFuture<Map<Integer, List<AirportTuple>>> futureResult = job2.mapper(new MovementCounterOverThousandsMapper())
-                .reducer(new SameKeyGrouperReducerFactory()).submit();
+        JobCompletableFuture<List<Map.Entry<Integer, List<AirportTuple>>>> futureResult = job2.mapper(new MovementCounterOverThousandsMapper())
+                .reducer(new SameKeyGrouperReducerFactory()).submit(new OrderByKeyCollator<>(false));
 
         // Get map from result
-        Map<Integer, List<AirportTuple>> result = futureResult.get();
+        List<Map.Entry<Integer, List<AirportTuple>>> result = futureResult.get();
 
         // Iterate through entries to print them
         this.outPath.println("Grupo;Aeropuerto A;Aeropuerto B");
-        for(Map.Entry<Integer, List<AirportTuple>> entry : result.entrySet()) {
+        for(Map.Entry<Integer, List<AirportTuple>> entry : result) {
             Integer millennium = entry.getKey();
             for(AirportTuple tuple : entry.getValue()) {
                 this.outPath.println((millennium) + ";" + tuple.getAirport1() + ";" + tuple.getAirport2());

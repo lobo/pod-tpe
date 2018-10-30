@@ -57,7 +57,7 @@ public class MovementsReader {
 			MovementData movementData;
 			while( (movementData = beanReader.read(MovementData.class, header, processors)) != null ) {
 				movementsMap.set(beanReader.getRowNumber(), movementData);
-//				System.out.println("Putting: " + movementData);
+				System.out.println("Putting: " + movementData);
 			}
 
 		}

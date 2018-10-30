@@ -5,6 +5,7 @@ import com.hazelcast.mapreduce.Reducer;
 import com.hazelcast.mapreduce.ReducerFactory;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class SameKeyGrouperReducerFactory implements ReducerFactory<Integer, String, List<AirportTuple>> {
@@ -29,6 +30,12 @@ public class SameKeyGrouperReducerFactory implements ReducerFactory<Integer, Str
                         tuples.add(new AirportTuple(oaci1, oaci2));
                     }
                 }
+                tuples.sort(new Comparator<AirportTuple>() {
+                    @Override
+                    public int compare(AirportTuple o1, AirportTuple o2) {
+                        return o1.compareTo(o2);
+                    }
+                });
                 return tuples;
             }
         };
