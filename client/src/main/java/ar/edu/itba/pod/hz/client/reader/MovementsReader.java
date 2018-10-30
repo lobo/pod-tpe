@@ -12,6 +12,7 @@ import org.supercsv.prefs.CsvPreference;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.HashMap;
 
 public class MovementsReader {
 
@@ -53,12 +54,14 @@ public class MovementsReader {
 					null,
 					null
 			};
-
+			HashMap<Integer,MovementData> mapCache=new HashMap<>();
 			MovementData movementData;
 			while( (movementData = beanReader.read(MovementData.class, header, processors)) != null ) {
-				movementsMap.set(beanReader.getRowNumber(), movementData);
-				System.out.println("Putting: " + movementData);
+				//movementsMap.put(beanReader.getRowNumber(), movementData);
+				mapCache.put(beanReader.getRowNumber(), movementData);
+//				System.out.println("Putting: " + movementData);
 			}
+			movementsMap.putAll(mapCache);
 
 		}
 		finally {

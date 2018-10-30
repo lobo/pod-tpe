@@ -11,6 +11,7 @@ import org.supercsv.prefs.CsvPreference;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.HashMap;
 
 public class AirportsReader {
 
@@ -60,10 +61,13 @@ public class AirportsReader {
 			};
 
 			AirportData airportData;
+			HashMap<String ,AirportData> mapCache=new HashMap<>();
 			while( (airportData = beanReader.read(AirportData.class, header, processors)) != null ) {
 				if(!"".equals(airportData.getOaci()))
-					airportsMap.set(airportData.getOaci(), airportData);
+					mapCache.put(airportData.getOaci(), airportData);
+//					airportsMap.set(airportData.getOaci(), airportData);
 			}
+			airportsMap.putAll(mapCache);
 
 		}
 		finally {
