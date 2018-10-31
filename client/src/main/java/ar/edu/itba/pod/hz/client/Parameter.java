@@ -46,7 +46,7 @@ public class Parameter {
 
             ret.airportsInPath = System.getProperty("airportsInPath","aeropuertos.csv");
             ret.movementsInPath = System.getProperty("movementsInPath","movimientos_short.csv");
-            ret.outPath = System.getProperty("movementsInPath","");
+            ret.outPath = System.getProperty("outPath","");
             ret.timeOutPath = System.getProperty("timeOutPath","");
             if(ret.query_number == 1){
                 //ninguno
