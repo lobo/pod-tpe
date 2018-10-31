@@ -11,6 +11,8 @@ import ar.edu.itba.pod.hz.mr.query3.OriginDestinationMapper;
 import ar.edu.itba.pod.hz.mr.query4.OrderByCollator;
 import ar.edu.itba.pod.hz.mr.query4.OrderKeyAndValueCollator;
 import ar.edu.itba.pod.hz.mr.query5.MovementInternationalMapper;
+import ar.edu.itba.pod.hz.mr.query6.IdentityReducerFactory;
+import ar.edu.itba.pod.hz.mr.query6.MinCountFilterMapper;
 import ar.edu.itba.pod.hz.mr.query6.MovementToProvinceTupleMapper;
 import ar.edu.itba.pod.hz.mr.query6.ProvToProvMoveCounterReducerFactory;
 import ar.edu.itba.pod.hz.mr.query4.AirportLandingFromOaciMapper;
@@ -345,6 +347,8 @@ public class Client {
     public void query6(IMap<Integer, MovementData> movementsMap, IMap<String, AirportData> airportsMap, Integer min) throws ExecutionException, InterruptedException {
         JobTracker tracker = client.getJobTracker(JOB_TRACKER);
 
+        final String INTERMEDIATE_MAP_NAME = "LEGAJOS-INTERMEDIATE";
+
         // Use created map as source for job
         KeyValueSource<Integer, MovementData> source = KeyValueSource.fromMap(movementsMap);
 
@@ -352,11 +356,35 @@ public class Client {
         Job<Integer, MovementData> job = tracker.newJob(source);
 
         // Submit map-reduce job
-        JobCompletableFuture<List<Map.Entry<ProvinceTuple, Integer>>> futureResult = job.mapper(new MovementToProvinceTupleMapper(AIRPORT_MAP_NAME))
+        JobCompletableFuture<Map<ProvinceTuple, Integer>> intermediateFutureResult = job.mapper(new MovementToProvinceTupleMapper(AIRPORT_MAP_NAME))
                 .reducer(new ProvToProvMoveCounterReducerFactory())
-                .submit(new OrderKeyAndValueCollator<ProvinceTuple,Integer>(false,true,false));
+                .submit();
 
-        // Get map from result
+        // Create local intermediate map
+        Map<ProvinceTuple, Integer> intermediateResult = intermediateFutureResult.get();
+
+        // Create intermediate map for second map-reduce job input
+        IMap<ProvinceTuple, Integer> intermediateMap = this.client.getMap(INTERMEDIATE_MAP_NAME);
+
+        // Clear it in case it already exists
+        intermediateMap.clear();
+
+        // Fill with entries from first map-reduce job out
+        for(Map.Entry<ProvinceTuple, Integer> entry : intermediateResult.entrySet()) {
+            intermediateMap.set(entry.getKey(), entry.getValue());
+        }
+
+        // Create source for second map-reduce job
+        KeyValueSource<ProvinceTuple, Integer> source2 = KeyValueSource.fromMap(intermediateMap);
+
+        // Create second job
+        Job<ProvinceTuple, Integer> job2 = tracker.newJob(source2);
+
+        // Submit second map-reduce job
+        JobCompletableFuture<List<Map.Entry<ProvinceTuple,Integer>>> futureResult = job2.mapper(new MinCountFilterMapper(min))
+                .reducer(new IdentityReducerFactory()).submit(new OrderByCollator<ProvinceTuple, Integer>(true, false));
+
+        // Get result
         List<Map.Entry<ProvinceTuple, Integer>> result = futureResult.get();
 
         this.outPath.println("Provincia A;Provincia B;Movimientos");
