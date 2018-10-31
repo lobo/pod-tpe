@@ -33,7 +33,9 @@ public class MovementToProvinceTupleMapper implements Mapper<Integer, MovementDa
         AirportData destAirport = airports.get(oaciDest);
 
         if(originAirport != null && destAirport != null) {
-            context.emit(new ProvinceTuple(originAirport.getProvince(), destAirport.getProvince()), 1);
+            if(!originAirport.getProvince().equals(destAirport.getProvince())) {
+                context.emit(new ProvinceTuple(originAirport.getProvince(), destAirport.getProvince()), 1);
+            }
         }
     }
 
