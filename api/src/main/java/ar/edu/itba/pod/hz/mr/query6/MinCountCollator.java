@@ -6,9 +6,6 @@ import com.hazelcast.mapreduce.Collator;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by giulianoscaglioni on 28/10/18.
- */
 public class MinCountCollator implements Collator<Map.Entry<ProvinceTuple, Integer>, Map<ProvinceTuple, Integer>> {
     private Integer n;
 

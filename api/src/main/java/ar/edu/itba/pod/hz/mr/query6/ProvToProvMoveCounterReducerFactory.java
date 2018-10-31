@@ -4,9 +4,6 @@ import ar.edu.itba.pod.hz.model.ProvinceTuple;
 import com.hazelcast.mapreduce.Reducer;
 import com.hazelcast.mapreduce.ReducerFactory;
 
-/**
- * Created by giulianoscaglioni on 28/10/18.
- */
 public class ProvToProvMoveCounterReducerFactory implements ReducerFactory<ProvinceTuple, Integer, Integer> {
     @Override
     public Reducer<Integer, Integer> newReducer(ProvinceTuple provinceTuple) {

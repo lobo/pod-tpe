@@ -11,7 +11,7 @@ import ar.edu.itba.pod.hz.mr.query3.OriginDestinationMapper;
 import ar.edu.itba.pod.hz.mr.query4.OrderByCollator;
 import ar.edu.itba.pod.hz.mr.query4.OrderKeyAndValueCollator;
 import ar.edu.itba.pod.hz.mr.query5.MovementInternationalMapper;
-import ar.edu.itba.pod.hz.mr.query6.ProvToProvMoveCounterMapper;
+import ar.edu.itba.pod.hz.mr.query6.MovementToProvinceTupleMapper;
 import ar.edu.itba.pod.hz.mr.query6.ProvToProvMoveCounterReducerFactory;
 import ar.edu.itba.pod.hz.mr.query4.AirportLandingFromOaciMapper;
 import com.hazelcast.client.HazelcastClient;
@@ -345,33 +345,14 @@ public class Client {
     public void query6(IMap<Integer, MovementData> movementsMap, IMap<String, AirportData> airportsMap, Integer min) throws ExecutionException, InterruptedException {
         JobTracker tracker = client.getJobTracker(JOB_TRACKER);
 
-        final String PROVINCES_MOVEMENTS_MAP = "LEGAJOS-PROVINCES";
-
-        // create map with province names
-        IMap<Integer, ProvinceTuple> provincesMovementsMap = this.client.getMap(PROVINCES_MOVEMENTS_MAP);
-
-        // Clear it in case it already exists
-        provincesMovementsMap.clear();
-
-        // Fill with entries from movementsMap with province names
-        for(Map.Entry<Integer, MovementData> entry : movementsMap.entrySet()) {
-            String originOACI = entry.getValue().getOriginOACI();
-            String destOACI = entry.getValue().getDestOACI();
-            AirportData originAirport = airportsMap.get(originOACI);
-            AirportData destAirport = airportsMap.get(destOACI);
-            if(originAirport != null && destAirport != null) {
-                provincesMovementsMap.set(entry.getKey(), new ProvinceTuple(originAirport.getProvince(), destAirport.getProvince()));
-            }
-        }
-
         // Use created map as source for job
-        KeyValueSource<Integer, ProvinceTuple> source = KeyValueSource.fromMap(provincesMovementsMap);
+        KeyValueSource<Integer, MovementData> source = KeyValueSource.fromMap(movementsMap);
 
         // Create job
-        Job<Integer, ProvinceTuple> job = tracker.newJob(source);
+        Job<Integer, MovementData> job = tracker.newJob(source);
 
         // Submit map-reduce job
-        JobCompletableFuture<List<Map.Entry<ProvinceTuple, Integer>>> futureResult = job.mapper(new ProvToProvMoveCounterMapper())
+        JobCompletableFuture<List<Map.Entry<ProvinceTuple, Integer>>> futureResult = job.mapper(new MovementToProvinceTupleMapper(AIRPORT_MAP_NAME))
                 .reducer(new ProvToProvMoveCounterReducerFactory())
                 .submit(new OrderKeyAndValueCollator<ProvinceTuple,Integer>(false,true,false));
 
