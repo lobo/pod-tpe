@@ -4,7 +4,7 @@
            xmlns="http://www.hazelcast.com/schema/config"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <group>
-        <name>52539-53891</name>
+        <name>51171-55099-57244</name>
         <password>pass</password>
     </group>
     <management-center enabled="true">http://localhost:8080/hazelcast-mancenter</management-center>
