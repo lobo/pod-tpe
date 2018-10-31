@@ -11,10 +11,7 @@ import ar.edu.itba.pod.hz.mr.query3.OriginDestinationMapper;
 import ar.edu.itba.pod.hz.mr.query4.OrderByCollator;
 import ar.edu.itba.pod.hz.mr.query4.OrderKeyAndValueCollator;
 import ar.edu.itba.pod.hz.mr.query5.MovementInternationalMapper;
-import ar.edu.itba.pod.hz.mr.query6.IdentityReducerFactory;
-import ar.edu.itba.pod.hz.mr.query6.MinCountFilterMapper;
-import ar.edu.itba.pod.hz.mr.query6.MovementToProvinceTupleMapper;
-import ar.edu.itba.pod.hz.mr.query6.ProvToProvMoveCounterReducerFactory;
+import ar.edu.itba.pod.hz.mr.query6.*;
 import ar.edu.itba.pod.hz.mr.query4.AirportLandingFromOaciMapper;
 import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.client.config.ClientConfig;
@@ -381,7 +378,7 @@ public class Client {
         Job<ProvinceTuple, Integer> job2 = tracker.newJob(source2);
 
         // Submit second map-reduce job
-        JobCompletableFuture<List<Map.Entry<ProvinceTuple,Integer>>> futureResult = job2.mapper(new MinCountFilterMapper(min))
+        JobCompletableFuture<List<Map.Entry<ProvinceTuple,Integer>>> futureResult = job2.mapper(new MinCountFilterMapper(min)).combiner(new ProvinceTupleCombiner())
                 .reducer(new IdentityReducerFactory()).submit(new OrderByCollator<ProvinceTuple, Integer>(false, false));
 
         // Get result
