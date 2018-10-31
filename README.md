@@ -78,15 +78,15 @@ First, run `./make.sh` to generate scripts
 * run `./run-client -Daddresses=xx.xx.xx.xx;yy.yy.yy.yy -Dquery=3 -DmovementsInPath=movimientos.csv -DairportsInPath=aeropuertos.csv -DoutPath=output.csv`
 
 ##### For Query 4: 
-* run `./run-client -Daddresses=xx.xx.xx.xx;yy.yy.yy.yy -Dquery=2 -DmovementsInPath=movimientos.csv -DairportsInPath=aeropuertos.csv -DoutPath=output.csv -Doaci=SAEZ -Dn=5`
+* run `./run-client -Daddresses=xx.xx.xx.xx;yy.yy.yy.yy -Dquery=4 -DmovementsInPath=movimientos.csv -DairportsInPath=aeropuertos.csv -DoutPath=output.csv -Doaci=SAEZ -Dn=5`
 * Notice here the query parameters are: `oaci=SAEZ` and `n=5`.
 
 ##### For Query 5: 
-* run `./run-client -Daddresses=xx.xx.xx.xx;yy.yy.yy.yy -Dquery=2 -DmovementsInPath=movimientos.csv -DairportsInPath=aeropuertos.csv -DoutPath=output.csv -Dn=5`
+* run `./run-client -Daddresses=xx.xx.xx.xx;yy.yy.yy.yy -Dquery=5 -DmovementsInPath=movimientos.csv -DairportsInPath=aeropuertos.csv -DoutPath=output.csv -Dn=5`
 * Notice here the query parameter is: `n=5`.
 
 ##### For Query 6: 
-* run `./run-client -Daddresses=xx.xx.xx.xx;yy.yy.yy.yy -Dquery=2 -DmovementsInPath=movimientos.csv -DairportsInPath=aeropuertos.csv -DoutPath=output.csv -Dmin=3`
+* run `./run-client -Daddresses=xx.xx.xx.xx;yy.yy.yy.yy -Dquery=6 -DmovementsInPath=movimientos.csv -DairportsInPath=aeropuertos.csv -DoutPath=output.csv -Dmin=3`
 * Notice here the query parameter is: `min=3`.
 
 ### Run From Eclipse
