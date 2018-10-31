@@ -354,6 +354,7 @@ public class Client {
 
         // Submit map-reduce job
         JobCompletableFuture<Map<ProvinceTuple, Integer>> intermediateFutureResult = job.mapper(new MovementToProvinceTupleMapper(AIRPORT_MAP_NAME))
+                .combiner(new ProvinceTupleCombiner())
                 .reducer(new ProvToProvMoveCounterReducerFactory())
                 .submit();
 
@@ -378,7 +379,7 @@ public class Client {
         Job<ProvinceTuple, Integer> job2 = tracker.newJob(source2);
 
         // Submit second map-reduce job
-        JobCompletableFuture<List<Map.Entry<ProvinceTuple,Integer>>> futureResult = job2.mapper(new MinCountFilterMapper(min)).combiner(new ProvinceTupleCombiner())
+        JobCompletableFuture<List<Map.Entry<ProvinceTuple,Integer>>> futureResult = job2.mapper(new MinCountFilterMapper(min))
                 .reducer(new IdentityReducerFactory()).submit(new OrderByCollator<ProvinceTuple, Integer>(false, false));
 
         // Get result
