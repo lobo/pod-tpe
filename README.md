@@ -1,4 +1,4 @@
-Distributed Objects Programming course Project: Grupo 3
+# ITBA - Distributed Objects Programming course Project: Grupo 3
 
 ## Getting started
 These instructions will install the development environment into your local machine
