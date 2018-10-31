@@ -30,7 +30,7 @@ public class Parameter {
         try {
             Parameter ret = new Parameter();
 
-            ret.name = System.getProperty("name", "52539-53891");
+            ret.name = System.getProperty("name", "51171-55099-57244");
             ret.password = System.getProperty("password", "pass");
             String addrs = System.getProperty("addresses", "127.0.0.1");
             ret.addresses = addrs.split("[,;]");
