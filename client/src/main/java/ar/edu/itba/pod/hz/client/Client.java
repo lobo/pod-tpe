@@ -3,7 +3,6 @@ package ar.edu.itba.pod.hz.client;
 import ar.edu.itba.pod.hz.client.reader.AirportsReader;
 import ar.edu.itba.pod.hz.client.reader.MovementsReader;
 import ar.edu.itba.pod.hz.model.*;
-import ar.edu.itba.pod.hz.mr.quer2b.MovementCounterOverThousandsMapper;
 import ar.edu.itba.pod.hz.mr.query1.MovementCounterMapper;
 import ar.edu.itba.pod.hz.mr.query1.MovementCounterReducerFactory;
 import ar.edu.itba.pod.hz.mr.query2.*;
@@ -26,7 +25,6 @@ import com.hazelcast.mapreduce.JobCompletableFuture;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
 
-import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
