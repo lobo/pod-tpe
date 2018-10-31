@@ -382,7 +382,7 @@ public class Client {
 
         // Submit second map-reduce job
         JobCompletableFuture<List<Map.Entry<ProvinceTuple,Integer>>> futureResult = job2.mapper(new MinCountFilterMapper(min))
-                .reducer(new IdentityReducerFactory()).submit(new OrderByCollator<ProvinceTuple, Integer>(true, false));
+                .reducer(new IdentityReducerFactory()).submit(new OrderByCollator<ProvinceTuple, Integer>(false, false));
 
         // Get result
         List<Map.Entry<ProvinceTuple, Integer>> result = futureResult.get();
