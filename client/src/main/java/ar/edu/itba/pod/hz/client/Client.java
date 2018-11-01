@@ -353,34 +353,10 @@ public class Client {
         Job<Integer, MovementData> job = tracker.newJob(source);
 
         // Submit map-reduce job
-        JobCompletableFuture<Map<ProvinceTuple, Integer>> intermediateFutureResult = job.mapper(new MovementToProvinceTupleMapper(AIRPORT_MAP_NAME))
+        JobCompletableFuture<List<Map.Entry<ProvinceTuple, Integer>>> futureResult = job.mapper(new MovementToProvinceTupleMapper(AIRPORT_MAP_NAME))
                 .combiner(new ProvinceTupleCombiner())
                 .reducer(new ProvToProvMoveCounterReducerFactory())
-                .submit();
-
-        // Create local intermediate map
-        Map<ProvinceTuple, Integer> intermediateResult = intermediateFutureResult.get();
-
-        // Create intermediate map for second map-reduce job input
-        IMap<ProvinceTuple, Integer> intermediateMap = this.client.getMap(INTERMEDIATE_MAP_NAME);
-
-        // Clear it in case it already exists
-        intermediateMap.clear();
-
-        // Fill with entries from first map-reduce job out
-        for(Map.Entry<ProvinceTuple, Integer> entry : intermediateResult.entrySet()) {
-            intermediateMap.set(entry.getKey(), entry.getValue());
-        }
-
-        // Create source for second map-reduce job
-        KeyValueSource<ProvinceTuple, Integer> source2 = KeyValueSource.fromMap(intermediateMap);
-
-        // Create second job
-        Job<ProvinceTuple, Integer> job2 = tracker.newJob(source2);
-
-        // Submit second map-reduce job
-        JobCompletableFuture<List<Map.Entry<ProvinceTuple,Integer>>> futureResult = job2.mapper(new MinCountFilterMapper(min))
-                .reducer(new IdentityReducerFactory()).submit(new OrderByCollator<ProvinceTuple, Integer>(false, false));
+                .submit(new OrderAndLimitCollator(min));
 
         // Get result
         List<Map.Entry<ProvinceTuple, Integer>> result = futureResult.get();

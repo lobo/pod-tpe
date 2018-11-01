@@ -12,7 +12,7 @@ public class ProvToProvMoveCounterReducerFactory implements ReducerFactory<Provi
 
             @Override
             public void reduce(Integer integer) {
-                count++;
+                count+=integer;
             }
 
             @Override
