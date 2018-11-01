@@ -17,7 +17,7 @@ public class OrderByKeyAndValueNCollator<K extends Comparable<K>,V extends Compa
 
 
     public OrderByKeyAndValueNCollator(int n,boolean firstKey, boolean ascending_key, boolean ascending_value){
-
+        this.n=n;
         comparatorKey = (e1,e2) -> (ascending_key ? 1 : -1) * e1.getKey().compareTo(e2.getKey());
         comparatorValue = (e1,e2) -> (ascending_value ? 1 : -1) * e1.getValue().compareTo(e2.getValue());
 
