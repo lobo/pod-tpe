@@ -287,7 +287,7 @@ public class Client {
 
         // Submit map-reduce job
         JobCompletableFuture<List<Map.Entry<String, Integer>>> futureResult = job.mapper(new AirportLandingFromOaciMapper(oaci))
-                .reducer(new MovementCounterReducerFactory()).submit(new OrderKeyAndValueCollator<>(false,true,false));
+                .reducer(new MovementCounterReducerFactory()).submit(new OrderByKeyAndValueNCollator<>(n,false,true,false));
 
         // Get map from result
         this.outPath.println("OACI;Aterrizajes");
@@ -325,11 +325,11 @@ public class Client {
         double total=1.0;
         for(Map.Entry<String,BiIntegerTuple> entry : result) {
             AirportData ad=airportsMap.get(entry.getKey());
-
-            total=entry.getValue().getNumber2();
-            double percentage=entry.getValue().getNumber1()/total*100;
-            this.outPath.println(ad.getIata()+';'+(int)floor(percentage)+'%');
-
+            if(ad!=null) {
+                total = entry.getValue().getNumber2();
+                double percentage = entry.getValue().getNumber1() / total * 100;
+                this.outPath.println(ad.getIata() + ';' + (int) floor(percentage) + '%');
+            }
 
         }
     }
