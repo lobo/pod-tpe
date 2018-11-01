@@ -325,7 +325,7 @@ public class Client {
         double total=1.0;
         for(Map.Entry<String,Integer> entry : result) {
             AirportData ad=airportsMap.get(entry.getKey());
-            if(ad!=null) {
+            if(ad!=null && entry.getKey().equals("")) {
                 this.outPath.println(ad.getIata() + ';' + entry.getValue() + '%');
             }
 
