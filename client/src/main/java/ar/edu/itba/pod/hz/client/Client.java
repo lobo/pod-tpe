@@ -10,6 +10,7 @@ import ar.edu.itba.pod.hz.mr.query3.AirportTupleIntegerTupleReducerFactory;
 import ar.edu.itba.pod.hz.mr.query3.OriginDestinationMapper;
 import ar.edu.itba.pod.hz.mr.query4.OrderByCollator;
 import ar.edu.itba.pod.hz.mr.query4.OrderKeyAndValueCollator;
+import ar.edu.itba.pod.hz.mr.query5.MovementCounter2Reducer;
 import ar.edu.itba.pod.hz.mr.query5.MovementInternationalMapper;
 import ar.edu.itba.pod.hz.mr.query6.*;
 import ar.edu.itba.pod.hz.mr.query4.AirportLandingFromOaciMapper;
@@ -285,7 +286,7 @@ public class Client {
 
         // Submit map-reduce job
         JobCompletableFuture<List<Map.Entry<String, Integer>>> futureResult = job.mapper(new AirportLandingFromOaciMapper(oaci))
-                .reducer(new MovementCounterReducerFactory()).submit(new OrderKeyAndValueCollator<>(false,true,false));
+                .reducer(new MovementCounter2Reducer()).submit(new OrderKeyAndValueCollator<>(false,true,false));
 
         // Get map from result
         this.outPath.println("OACI;Aterrizajes");

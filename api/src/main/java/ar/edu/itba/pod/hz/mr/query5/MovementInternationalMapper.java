@@ -19,6 +19,12 @@ public class MovementInternationalMapper implements Mapper<Integer, MovementData
                 context.emit(destOACI,1);
             }
 
+        }else{
+            if(type.equals("Despegue")){
+                context.emit(originOACI,-1);
+            }else{
+                context.emit(destOACI,-1);
+            }
         }
 
     }
