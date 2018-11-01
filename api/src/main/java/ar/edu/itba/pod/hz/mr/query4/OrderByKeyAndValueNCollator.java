@@ -40,7 +40,7 @@ public class OrderByKeyAndValueNCollator<K extends Comparable<K>,V extends Compa
         for(Map.Entry<K,V> elem: sorted){
             ret.add(elem);
             i++;
-            if(i>this.n){
+            if(i>=this.n){
                 break;
             }
         }
