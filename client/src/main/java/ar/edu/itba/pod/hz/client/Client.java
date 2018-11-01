@@ -327,7 +327,7 @@ public class Client {
             AirportData ad=airportsMap.get(entry.getKey());
             if(ad!=null) {
                 total = entry.getValue().getNumber2();
-                double percentage = entry.getValue().getNumber1() / total * 100;
+                    double percentage = entry.getValue().getNumber1() / total * 100;
                 this.outPath.println(ad.getIata() + ';' + (int) floor(percentage) + '%');
             }
 

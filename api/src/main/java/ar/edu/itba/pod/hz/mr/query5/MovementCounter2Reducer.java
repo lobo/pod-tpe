@@ -18,7 +18,9 @@ public class MovementCounter2Reducer implements ReducerFactory<String, Integer, 
 
 			@Override
 			public void reduce(final Integer value) {
-				count+=value;
+				if(value==1){
+					count++;
+				}
 				total++;
 			}
 

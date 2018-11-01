@@ -12,7 +12,6 @@ public class MovementInternationalMapper implements Mapper<Integer, MovementData
         String clasification =valueinput.getClasification();
 
         if(clasification.equals("Internacional")){
-            context.emit("",1);
             if(type.equals("Despegue")){
                 context.emit(originOACI,1);
             }else{
