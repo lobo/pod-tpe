@@ -9,6 +9,7 @@ import ar.edu.itba.pod.hz.mr.query2.*;
 import ar.edu.itba.pod.hz.mr.query3.AirportTupleIntegerTupleReducerFactory;
 import ar.edu.itba.pod.hz.mr.query3.OriginDestinationMapper;
 import ar.edu.itba.pod.hz.mr.query4.OrderByCollator;
+import ar.edu.itba.pod.hz.mr.query4.OrderByKeyAndValueNCollator;
 import ar.edu.itba.pod.hz.mr.query4.OrderKeyAndValueCollator;
 import ar.edu.itba.pod.hz.mr.query5.MovementCounter2Reducer;
 import ar.edu.itba.pod.hz.mr.query5.MovementInternationalMapper;
@@ -286,7 +287,7 @@ public class Client {
 
         // Submit map-reduce job
         JobCompletableFuture<List<Map.Entry<String, Integer>>> futureResult = job.mapper(new AirportLandingFromOaciMapper(oaci))
-                .reducer(new MovementCounter2Reducer()).submit(new OrderKeyAndValueCollator<>(false,true,false));
+                .reducer(new MovementCounterReducerFactory()).submit(new OrderKeyAndValueCollator<>(false,true,false));
 
         // Get map from result
         this.outPath.println("OACI;Aterrizajes");
@@ -294,9 +295,7 @@ public class Client {
         List<Map.Entry<String, Integer>> result = futureResult.get();
         for(Map.Entry<String, Integer> entry : result) {
             this.outPath.println(entry.getKey()+";"+entry.getValue());
-//            q++; //TODO chequear
-//            if(q==n)
-//                break;
+
         }
     }
 
@@ -314,29 +313,23 @@ public class Client {
         Job<Integer, MovementData> job = tracker.newJob(movements);
 
         // Submit map-reduce job
-        JobCompletableFuture<List<Map.Entry<String, Integer>>> futureResult = job.mapper(new MovementInternationalMapper())
-                .reducer(new MovementCounterReducerFactory()).submit(new OrderKeyAndValueCollator<>(false,true,false));
+        JobCompletableFuture<List<Map.Entry<String, BiIntegerTuple>>> futureResult = job.mapper(new MovementInternationalMapper())
+                .reducer(new MovementCounter2Reducer()).submit(new OrderByKeyAndValueNCollator<>(n,false,true,false));
 
         // Get map from result
-        List<Map.Entry<String, Integer>> result = futureResult.get();
+        List<Map.Entry<String, BiIntegerTuple>> result = futureResult.get();
 
         // Iterate through entries to print them
         this.outPath.println("IATA;Porcentaje");
 
         double total=1.0;
-        for(Map.Entry<String,Integer> entry : result) {
-            if(entry.getKey().equals("")){
-                total= Float.valueOf(entry.getValue());
-                continue;
-            }
+        for(Map.Entry<String,BiIntegerTuple> entry : result) {
             AirportData ad=airportsMap.get(entry.getKey());
-            if(ad!=null){
-                double percentage=entry.getValue()/total*100;
-                this.outPath.println(ad.getIata()+';'+(int)floor(percentage)+'%');
-                q++; //TODO chequear
-                if(q==n)
-                    break;
-            }
+
+            total=entry.getValue().getNumber2();
+            double percentage=entry.getValue().getNumber1()/total*100;
+            this.outPath.println(ad.getIata()+';'+(int)floor(percentage)+'%');
+
 
         }
     }
