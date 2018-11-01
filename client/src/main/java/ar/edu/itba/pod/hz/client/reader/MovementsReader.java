@@ -56,10 +56,20 @@ public class MovementsReader {
 			};
 			HashMap<Integer,MovementData> mapCache=new HashMap<>();
 			MovementData movementData;
+			int MAXSIZE=500000;
+			int n=0;
+
+
 			while( (movementData = beanReader.read(MovementData.class, header, processors)) != null ) {
 				//movementsMap.put(beanReader.getRowNumber(), movementData);
 				mapCache.put(beanReader.getRowNumber(), movementData);
 //				System.out.println("Putting: " + movementData);
+				n++;
+				if(n>MAXSIZE){
+					movementsMap.putAll(mapCache);
+					mapCache=new HashMap<>();
+					n=0;
+				}
 			}
 			movementsMap.putAll(mapCache);
 

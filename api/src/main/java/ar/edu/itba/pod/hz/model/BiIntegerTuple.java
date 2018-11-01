@@ -7,15 +7,15 @@ import com.hazelcast.nio.serialization.DataSerializable;
 import java.io.IOException;
 
 public class BiIntegerTuple implements DataSerializable, Comparable<BiIntegerTuple> {
-    private Integer number1 = 0;
-    private Integer number2 = 0;
+    private Long number1 = 0l;
+    private Long number2 = 0l;
 
 
     public BiIntegerTuple() {
         super();
     }
 
-    public BiIntegerTuple(Integer number1, Integer number2) {
+    public BiIntegerTuple(Long number1, Long number2) {
         this.number1 = number1;
         this.number2 = number2;
     }
@@ -27,23 +27,23 @@ public class BiIntegerTuple implements DataSerializable, Comparable<BiIntegerTup
 
     @Override
     public void readData(ObjectDataInput objectDataInput) throws IOException {
-        number1 = Integer.valueOf( objectDataInput.readUTF());
-        number2 = Integer.valueOf( objectDataInput.readUTF());
+        number1 = Long.valueOf( objectDataInput.readUTF());
+        number2 = Long.valueOf( objectDataInput.readUTF());
     }
 
-    public void setNumber1(Integer number1) {
+    public void setNumber1(Long number1) {
         this.number1 = number1;
     }
 
-    public void setNumber2(Integer number2) {
+    public void setNumber2(Long number2) {
         this.number2 = number2;
     }
 
-    public Integer getNumber1() {
+    public Long getNumber1() {
         return number1;
     }
 
-    public Integer getNumber2() {
+    public Long getNumber2() {
         return number2;
     }
 

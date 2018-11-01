@@ -62,9 +62,18 @@ public class AirportsReader {
 
 			AirportData airportData;
 			HashMap<String ,AirportData> mapCache=new HashMap<>();
+			int MAXSIZE=500000;
+			int n=0;
+
 			while( (airportData = beanReader.read(AirportData.class, header, processors)) != null ) {
 				if(!"".equals(airportData.getOaci()))
 					mapCache.put(airportData.getOaci(), airportData);
+					n++;
+					if(n>MAXSIZE){
+						airportsMap.putAll(mapCache);
+						mapCache=new HashMap<>();
+						n=0;
+					}
 //					airportsMap.set(airportData.getOaci(), airportData);
 			}
 			airportsMap.putAll(mapCache);

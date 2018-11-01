@@ -15,7 +15,22 @@ import java.util.stream.Collectors;
 public class OrderAndLimitCollator implements Collator<Map.Entry<ProvinceTuple, Integer>, List<Map.Entry<ProvinceTuple, Integer>>> {
     private int min;
 
-    public OrderAndLimitCollator(int min) {
+    private final Comparator<Map.Entry<ProvinceTuple, Integer>> comparator;
+    Comparator<Map.Entry<ProvinceTuple, Integer>> comparatorKey;
+    Comparator<Map.Entry<ProvinceTuple, Integer>> comparatorValue;
+
+
+    public OrderAndLimitCollator(int min,boolean firstKey, boolean ascending_key, boolean ascending_value) {
+
+        comparatorKey = (e1,e2) -> (ascending_key ? 1 : -1) * e1.getKey().compareTo(e2.getKey());
+        comparatorValue = (e1,e2) -> (ascending_value ? 1 : -1) * e1.getValue().compareTo(e2.getValue());
+
+        if(firstKey){
+            comparator = (e1,e2) -> (e1.getKey().equals(e2.getKey()) ? comparatorValue.compare(e1,e2): comparatorKey.compare(e1,e2));
+        } else {
+            comparator = (e1,e2) -> (e1.getValue().equals(e2.getValue()) ? comparatorKey.compare(e1,e2): comparatorValue.compare(e1,e2));
+        }
+
         this.min = min;
     }
 
@@ -29,6 +44,6 @@ public class OrderAndLimitCollator implements Collator<Map.Entry<ProvinceTuple, 
             }
         }
 
-        return ret.stream().sorted(Comparator.comparing(Map.Entry::getValue)).collect(Collectors.toList());
+        return ret.stream().sorted(comparator).collect(Collectors.toList());
     }
 }

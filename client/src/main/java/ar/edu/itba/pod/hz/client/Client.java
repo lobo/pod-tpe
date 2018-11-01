@@ -354,9 +354,9 @@ public class Client {
 
         // Submit map-reduce job
         JobCompletableFuture<List<Map.Entry<ProvinceTuple, Integer>>> futureResult = job.mapper(new MovementToProvinceTupleMapper(AIRPORT_MAP_NAME))
-                .combiner(new ProvinceTupleCombiner())
+//                .combiner(new ProvinceTupleCombiner())
                 .reducer(new ProvToProvMoveCounterReducerFactory())
-                .submit(new OrderAndLimitCollator(min));
+                .submit(new OrderAndLimitCollator(min,false,true,false));
 
         // Get result
         List<Map.Entry<ProvinceTuple, Integer>> result = futureResult.get();

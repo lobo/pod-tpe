@@ -14,8 +14,8 @@ public class OriginDestinationMapper implements Mapper<Integer, MovementData, Ai
         String destOACI = valueinput.getDestOACI();
 
         /** Add movement in origin airport */
-        context.emit(new AirportTuple(originOACI,destOACI), new BiIntegerTuple(1,0));
-        context.emit(new AirportTuple(destOACI,originOACI), new BiIntegerTuple(0,1));
+        context.emit(new AirportTuple(originOACI,destOACI), new BiIntegerTuple(1l,0l));
+        context.emit(new AirportTuple(destOACI,originOACI), new BiIntegerTuple(0l,1l));
 
     }
 }
