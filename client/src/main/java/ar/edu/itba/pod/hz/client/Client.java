@@ -313,22 +313,20 @@ public class Client {
         Job<Integer, MovementData> job = tracker.newJob(movements);
 
         // Submit map-reduce job
-        JobCompletableFuture<List<Map.Entry<String, BiIntegerTuple>>> futureResult = job.mapper(new MovementInternationalMapper())
+        JobCompletableFuture<List<Map.Entry<String, Integer>>> futureResult = job.mapper(new MovementInternationalMapper())
                 .reducer(new MovementCounter2Reducer()).submit(new OrderByKeyAndValueNCollator<>(n,false,true,false));
 
         // Get map from result
-        List<Map.Entry<String, BiIntegerTuple>> result = futureResult.get();
+        List<Map.Entry<String, Integer>> result = futureResult.get();
 
         // Iterate through entries to print them
         this.outPath.println("IATA;Porcentaje");
 
         double total=1.0;
-        for(Map.Entry<String,BiIntegerTuple> entry : result) {
+        for(Map.Entry<String,Integer> entry : result) {
             AirportData ad=airportsMap.get(entry.getKey());
             if(ad!=null) {
-                total = entry.getValue().getNumber2();
-                    double percentage = entry.getValue().getNumber1() / total * 100;
-                this.outPath.println(ad.getIata() + ';' + (int) floor(percentage) + '%');
+                this.outPath.println(ad.getIata() + ';' + entry.getValue() + '%');
             }
 
         }

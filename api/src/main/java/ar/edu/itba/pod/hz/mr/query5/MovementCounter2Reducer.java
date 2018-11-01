@@ -4,10 +4,10 @@ import ar.edu.itba.pod.hz.model.BiIntegerTuple;
 import com.hazelcast.mapreduce.Reducer;
 import com.hazelcast.mapreduce.ReducerFactory;
 
-public class MovementCounter2Reducer implements ReducerFactory<String, Integer, BiIntegerTuple> {
+public class MovementCounter2Reducer implements ReducerFactory<String, Integer, Integer> {
 	@Override
-	public Reducer<Integer, BiIntegerTuple> newReducer(final String category) {
-		return new Reducer<Integer, BiIntegerTuple>() {
+	public Reducer<Integer, Integer> newReducer(final String category) {
+		return new Reducer<Integer, Integer>() {
 			private int count;
 			private int total;
 
@@ -25,8 +25,8 @@ public class MovementCounter2Reducer implements ReducerFactory<String, Integer, 
 			}
 
 			@Override
-			public BiIntegerTuple finalizeReduce() {
-				return new BiIntegerTuple((long)count,(long)total);
+			public Integer finalizeReduce() {
+				return (int)Math.floor((double)count/total*100.0);
 			}
 		};
 	}
