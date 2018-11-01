@@ -293,9 +293,9 @@ public class Client {
         List<Map.Entry<String, Integer>> result = futureResult.get();
         for(Map.Entry<String, Integer> entry : result) {
             this.outPath.println(entry.getKey()+";"+entry.getValue());
-            q++; //TODO chequear
-            if(q==n)
-                break;
+//            q++; //TODO chequear
+//            if(q==n)
+//                break;
         }
     }
 
