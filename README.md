@@ -59,7 +59,7 @@ First, run `./make.sh` to generate scripts
 #### Node
 
 * cd to `server/target/tpe-server-1.0-SNAPSHOT/`
-* run `./run-node`
+* run `./run-node.sh`
 
 **NOTE**: make sure to activate interfaces (false->true) and specify network in hazelcast.xml to activate multiple nodes in different computers. All computers need to have same hazelcast.xml
 
